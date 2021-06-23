@@ -46,17 +46,21 @@
 	* [传输-下载](#传输-下载)
 		* [bt](#bt)
 		* [远程访问](#远程访问)
-	* [Firewall](#Firewall)
-		* [Firewalld](#Firewalld)
-		* [Iptables](#Iptables)
+	* [Firewall](#firewall)
+		* [Firewalld](#firewalld)
+		* [Iptables](#iptables)
+		* [ufw](#ufw)
 	* [软件包管理](#软件包管理)
 		* [apt](#apt)
-		* [Binary](#Binary)
+		* [Binary](#binary)
+		* [dnf](#dnf)
 		* [dpkg](#dpkg)
-		* [Pacman](#Pacman)
+		* [Pacman](#pacman)
 		* [rpm](#rpm)
 		* [snap](#snap)
 		* [yum](#yum)
+			* 配置 yum 源
+			* 配置 EPEL 源
 		* [常用软件](#常用软件)
 
 * **[🦋 系统管理](#系统管理)**
@@ -64,16 +68,20 @@
 		* [日志](#日志)
 	* [系统设置](#系统设置)
 		* [时间](#时间)
+		* [时区](#时区)
 		* [语言](#语言)
 		* [启动项-计划任务](#启动项-计划任务)
-		* [SELinux](#SELinux)
+		* [SELinux](#selinux)
 	* [账号管控](#账号管控)
 	* [进程管理](#进程管理)
+	* [内核管理](#内核管理)
 	* [设备管理](#设备管理)
+		* [内存](#内存)
 		* [磁盘](#磁盘)
 		* [无线网卡](#无线网卡)
 		* [蓝牙](#蓝牙)
 		* [外接硬盘](#外接硬盘)
+		* CD & DVD
 
 ---
 
@@ -155,6 +163,12 @@ IF ~/.bash_logout exists THEN
     execute ~/.bash_logout
 END IF
 ```
+
+**各变量文件区别**
+- /etc/profile: 此文件为系统的每个用户设置环境信息。当用户登录时，该文件被执行一次，并从 /etc/profile.d 目录的配置文件中搜集shell 的设置。一般用于设置所有用户使用的全局变量。
+- /etc/bashrc: 当 bash shell 被打开时，该文件被读取。也就是说，每次新打开一个终端 shell，该文件就会被读取。
+- ~/.bash_profile 或 ~/.profile: 只对单个用户生效，当用户登录时该文件仅执行一次。用户可使用该文件添加自己使用的 shell 变量信息。另外在不同的LINUX操作系统下，这个文件可能是不同的，可能是 ~/.bash_profile， ~/.bash_login 或 ~/.profile 其中的一种或几种，如果存在几种的话，那么执行的顺序便是：~/.bash_profile、 ~/.bash_login、 ~/.profile。比如 Ubuntu 系统一般是 ~/.profile 文件。
+- ~/.bashrc: 只对单个用户生效，当登录以及每次打开新的 shell 时，该文件被读取。
 
 **bash 设置环境变量**
 ```bash
@@ -261,8 +275,8 @@ souce ~/.config/fish/config.fish
 
 	# e.g.
 	sort namesd.txt | uniq		# 使用 uniq 命令从文件中删除重复项
-	sort namesd.txt | uniq –c	# 使用 Uniq 显示重复的行数
-	sort namesd.txt | uniq –cd	# 使用 Uniq 仅显示重复的行
+	sort namesd.txt | uniq -c	# 使用 Uniq 显示重复的行数
+	sort namesd.txt | uniq -cd	# 使用 Uniq 仅显示重复的行
 	grep name /proc/cpuinfo | uniq	# 查询 cpuinfo 信息合并成一条
 	cat /proc/cpuinfo | grep name |cut -f2 -d ":" | uniq		# 查询 cpuinfo 信息合并成一条并只输出: 后的内容
 	```
@@ -275,7 +289,7 @@ souce ~/.config/fish/config.fish
 	sort names.txt		# 以升序对文本文件进行排序
 	sort -r names.txt	# 以降序对文本文件进行排序
 	sort -t: -k 3n /etc/passwd | more	# 按第 3 个字段（数字用户 ID）对 passwd 文件进行排序
-	sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n /etc/hosts	# 按 IP 地址对 / etc / hosts 文件进行排序
+	sort -t . -k 1,1n -k 2,2n -k 3,3n -k 4,4n /etc/hosts	# 按 IP 地址对 /etc/hosts 文件进行排序
 	```
 
 - xargs
@@ -284,8 +298,8 @@ souce ~/.config/fish/config.fish
 
 	# e.g.
 	find ~ -name '*.tmp' -print0 | xargs -0 rm -f	# 尝试使用 rm 删除所有 tmp 文件
-	find /etc -name "*.conf" | xargs ls –l			# 获取 /etc/ 下所有 *.conf 文件的列表
-	cat url-list.txt | xargs wget –c				# 如果需要从文件读取要下载的 URL 列表
+	find /etc -name "*.conf" | xargs ls -l			# 获取 /etc/ 下所有 *.conf 文件的列表
+	cat url-list.txt | xargs wget -c				# 如果需要从文件读取要下载的 URL 列表
 	find / -name *.jpg -type f -print | xargs tar -cvzf images.tar.gz	# 找出所有 jpg 图像并将其存档
 	ls *.jpg | xargs -n1 -i cp {} /external-hard-drive/directory 		# 将所有图像复制到外部硬盘驱动器
 	```
@@ -297,25 +311,38 @@ souce ~/.config/fish/config.fish
 	# e.g.
 	ls | tee file 				# 将输出既写入屏幕（stdout），又写入文件
 	ls | tee file1 file2 file3	# 输出写入多个文件
-	ls | tee –a file			# 追加而不是覆盖
-	crontab -l | tee crontab-backup.txt | sed 's/old/new/' | crontab –	# 对 crontab 条目进行备份，并将 crontab 条目作为 sed 命令的输入，由 sed 命令进行替换。替换后，它将被添加为一个新的cron作业。
+	ls | tee -a file			# 追加而不是覆盖
+	crontab -l | tee crontab-backup.txt | sed 's/old/new/' | crontab -	# 对 crontab 条目进行备份，并将 crontab 条目作为 sed 命令的输入，由 sed 命令进行替换。替换后，它将被添加为一个新的cron作业。
 	```
 
-**其他符号工具**
-```bash
-head		# 显示文件的开头的内容.默认下,显示文件的头 10 行内容.
-tail		# 显示文件中的尾部内容.默认下,显示文件的末尾 10 行内容.
-```
+- paste
+	```bash
+	# paste 可以将两个不同的文件合并到一个多列文件中。
+	paste aaa.txt bbb.txt
+	```
+
+- fold
+	```bash
+	# 限制输出的长度
+	cat /etc/passwd | fold -w 16
+	```
 
 ---
 
 ## 会话
 
+**清屏**
+```bash
+clear		# 刷新屏幕，本质上只是让终端显示页向后翻了一页，如果向上滚动屏幕还可以看到之前的操作信息
+reset		# 完全刷新终端屏幕
+printf "\033c"
+```
+
 **查看用户信息**
 ```bash
 id
 who			# 显示目前登录系统的用户信息.
-w			# 显示已经登陆系统的用户列表,并显示用户正在执行的指令.
+w			# 显示已经登录系统的用户列表,并显示用户正在执行的指令.
 last		# 显示用户最近登录信息
 ```
 
@@ -327,6 +354,7 @@ Ctrl+R		# 搜索历史命令
 Ctrl+P		# 切换上一个命令
 alt+F1-F6	# 切换虚拟控制台
 Alt+F7		# 图形界面
+Ctrl+L		# 清除命令
 ```
 
 **screen**
@@ -444,9 +472,14 @@ tail		# 用于显示文件的尾部的内容,默认情况下显示文件的尾�
 
 sed			# 一种流编辑器，它是文本处理中非常中的工具，能够完美的配合正则表达式使用
 	sed -n '5,10p' /etc/passwd	# 读取文件第5-10行
+	sed '/^$/d' test.txt		# 删除文件空行
 
 tac			# 是 cat 的反向操作，从最后一行开始打印
 less		# 允许用户向前或向后浏览文件
+
+nl			# 用来在 linux 系统中打印文件中行号
+	nl /etc/passwd
+	nl -b a /etc/passwd		# 空行也加上行号
 ```
 
 **二进制相关**
@@ -468,6 +501,10 @@ ldd			# 可以显示程序或者共享库所需的共享库
 	ldd /bin/cat
 
 nm			# 显示目标文件的符号
+	# -A：每个符号前显示文件名；
+	# -D：显示动态符号；
+	# -g：仅显示外部符号；
+	# -r：反序显示符号表。
 ```
 
 ### 创建
@@ -487,6 +524,7 @@ nm			# 显示目标文件的符号
 - mkdir
 	```bash
 	# 创建文件夹
+	mkdir -p /test						# 若 test 目录原本不存在，则建立一个
 	mkdir -p /mnt/aaa/aaa/aaa 			# 创建指定路径一系列文件夹
 	mkdir -m 777 /test					# 创建时指定权限
 	```
@@ -545,7 +583,7 @@ which <Command>		# 指令搜索,查找并显示给定命令的绝对路径
 	# e.g.
 	find / -name conf*	# 查找根目录及子目录下所有 conf 文件
 	find / -name site-packages -d	# 查找 site-packages 目录
-	find . –mtime -2				# 查找最近两天在当前目录下修改过的所有文件
+	find . -mtime -2				# 查找最近两天在当前目录下修改过的所有文件
 	find / -type f -size + 100M		# 列出系统中大于100MB的所有文件
 	```
 
@@ -561,6 +599,13 @@ which <Command>		# 指令搜索,查找并显示给定命令的绝对路径
 	wget https://github.com/sharkdp/fd/releases/download/v7.3.0/fd-musl_7.3.0_amd64.deb
 	dpkg -i fd-musl_7.3.0_amd64.deb
 	fd <File>
+	```
+
+- fzf
+	```bash
+	git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf
+	~/.fzf/install
+	fzf
 	```
 
 **找出重复文件**
@@ -595,6 +640,22 @@ which <Command>		# 指令搜索,查找并显示给定命令的绝对路径
 	fdupes -r /			# 递归扫描目录,包括子目录
 	fdupes -rd /		# 删除重复内容
 	```
+
+- fslint
+	```bash
+	# fslint 命令可以被特地用来寻找重复文件
+	fslint .
+	```
+
+**lsof**
+
+> 可以使用 lsof 命令来了解某人是否正在使用文件
+
+```bash
+lsof /dev/null			# Linux 中所有已打开文件的列表
+lsof -u root			# root 打开的文件列表
+lsof -i TCP:22			# 找出进程监听端口
+```
 
 ### 修改
 
@@ -808,6 +869,8 @@ ln file1 file2
 	```bash
 	unzip FileName.zip							# 解压
 	zip FileName.zip DirName					# 压缩
+	zip -s 4m myzip.zip --out zip				# 分卷压缩
+	cat zip.z* > myzip.zip && unzip myzip.zip	# zip 分卷解压缩
 	```
 
 - .rar
@@ -929,6 +992,7 @@ lsof -i					# 列出当前系统打开文件
 netstat -antup
 netstat -antpx
 netstat -tulpn
+fuser -v 22/tcp			# 查询进程使用的文件和网络套接字
 ```
 
 **路由表**
@@ -1189,12 +1253,28 @@ rz 			# 运行该命令会弹出一个文件选择窗口,从本地选择文件�
 wget [options] [target]
 
 # e.g.
-wget example.com/big.file.iso						# 下载目标文件
-wget --output-document=filename.html example.com	# 另行命名
-wget -c example.com/big.file.iso					# 恢复之前的下载
-wget --i list.txt									# 下载文件中的 url
-wget -r example.com									# 递归下载
-wget --no-check-certificate							# 不检查 https 证书
+wget example.com/big.file.iso								# 下载目标文件
+wget -O filename.html example.com							# 另行命名
+wget -c example.com/big.file.iso							# 恢复之前的下载
+wget -i list.txt											# 下载文件中的 url
+wget -r example.com											# 递归下载
+wget --no-check-certificate									# 不检查 https 证书
+wget ftp://user:password@host:/path-to-file/file.txt		# ftp 下载
+wget -br ftp://user:password@ftp-host:/path-for-download/	# 递归下载 ftp 目录下文件
+```
+
+**curl**
+```bash
+curl -o wordpress.zip https://wordpress.org/latest.zip		# 另行命名
+curl -C - O https://wordpress.org/latest.zip				# 恢复之前的下载
+```
+
+**Aria2**
+```bash
+aria2c http://releases.ubuntu.com/18.10/ubuntu-18.10-desktop-amd64.iso.torrent		# 下载磁力链接
+aria2c -i downloadurls.txt									# 下载文件中的 url
+aria2c -c http://releases.ubuntu.com/18.10/ubuntu-18.10-desktop-amd64.iso.torrent	# 恢复之前的下载
+aria2c –max-download-limit=100K http://releases.ubuntu.com/disco/ubuntu-19.04-desktop-amd64.iso.torrent		# 设置最大速度限制
 ```
 
 ### bt
@@ -1258,12 +1338,17 @@ iptables -A INPUT -p tcp -s 0.0.0.0/0 --dport 22 -j DROP
 
 iptables -L			# 查看防火墙规则
 iptables-restore </root/firewall_rules.backup	# 恢复规则
+iptables -F  		# 清除防火墙配置
 ```
 
 **Ubuntu 关闭防火墙**
 ```bash
 ufw disable
 ```
+
+### ufw
+
+见 [ufw.md](./实验/ufw.md)
 
 ---
 
@@ -1332,6 +1417,8 @@ apt-get update
 apt-get update & apt-get upgrade
 apt-get dist-upgrade
 apt-get clean
+
+apt-key list		# 查看仓库密钥
 ```
 
 **无法获得锁 /var/lib/apt/lists/lock - open (11: 资源暂时不可用)**
@@ -1341,6 +1428,11 @@ rm -rf /var/lib/dpkg/lock-frontend
 rm -rf /var/lib/dpkg/lock		# 强制解锁占用
 rm /var/lib/dpkg/lock
 rm /var/lib/apt/lists/lock
+```
+
+**E: Unable to correct problems, you have held broken packages.**
+```bash
+aptitude install <packagename>	# 该工具会想方设法的帮助你安装(提示依赖、其他安装包等等)
 ```
 
 **禁用 Ubuntu 自动更新**
@@ -1356,10 +1448,43 @@ nano /etc/apt/apt.conf.d/20auto-upgrades
     APT::Periodic::Unattended-Upgrade "0";
 ```
 
-**Ubuntu apt 换源**
+**enable the "Universe" repository**
+```bash
+add-apt-repository universe
+apt-get update
+```
+
+**Gdebi**
+
+> Gdebi 是一个安装 .deb 软件包的工具.提供了图形化的使用界面
+
+```bash
+apt update
+apt install -y gdebi
+```
+
+#### Ubuntu apt 换源
+
+**20.04**
 ```bash
 tee /etc/apt/sources.list <<-'EOF'
+deb http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ focal-backports main restricted universe multiverse
+EOF
+apt update
+```
 
+**18.04**
+```bash
+tee /etc/apt/sources.list <<-'EOF'
 deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
 deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
@@ -1374,26 +1499,86 @@ EOF
 apt update
 ```
 
-**Debain apt 换源**
+**16.04**
 ```bash
 tee /etc/apt/sources.list <<-'EOF'
-
-# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster main contrib non-free
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-updates main contrib non-free
-deb https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian/ buster-backports main contrib non-free
-deb https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free
-# deb-src https://mirrors.tuna.tsinghua.edu.cn/debian-security buster/updates main contrib non-free
+deb http://mirrors.aliyun.com/ubuntu/ xenial main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial main
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates main
+deb http://mirrors.aliyun.com/ubuntu/ xenial universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial universe
+deb http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-updates universe
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security main
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security main
+deb http://mirrors.aliyun.com/ubuntu/ xenial-security universe
+deb-src http://mirrors.aliyun.com/ubuntu/ xenial-security universe
 EOF
 apt update
 ```
 
-**Kali apt 换源**
+#### Debain apt 换源
+
+**10**
 ```bash
 tee /etc/apt/sources.list <<-'EOF'
+deb http://mirrors.aliyun.com/debian/ buster main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ buster main non-free contrib
+deb http://mirrors.aliyun.com/debian-security buster/updates main
+deb-src http://mirrors.aliyun.com/debian-security buster/updates main
+deb http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ buster-updates main non-free contrib
+deb http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ buster-backports main non-free contrib
+EOF
+apt update
+```
+
+**9**
+```bash
+tee /etc/apt/sources.list <<-'EOF'
+deb http://mirrors.aliyun.com/debian/ stretch main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ stretch main non-free contrib
+deb http://mirrors.aliyun.com/debian-security stretch/updates main
+deb-src http://mirrors.aliyun.com/debian-security stretch/updates main
+deb http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ stretch-updates main non-free contrib
+deb http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ stretch-backports main non-free contrib
+EOF
+apt update
+```
+
+**8**
+```bash
+tee /etc/apt/sources.list <<-'EOF'
+deb http://mirrors.aliyun.com/debian/ jessie main non-free contrib
+deb http://mirrors.aliyun.com/debian/ jessie-proposed-updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ jessie main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ jessie-proposed-updates main non-free contrib
+EOF
+apt update
+```
+
+**7**
+```bash
+tee /etc/apt/sources.list <<-'EOF'
+deb http://mirrors.aliyun.com/debian/ wheezy main non-free contrib
+deb http://mirrors.aliyun.com/debian/ wheezy-proposed-updates main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ wheezy main non-free contrib
+deb-src http://mirrors.aliyun.com/debian/ wheezy-proposed-updates main non-free contrib
+EOF
+apt update
+```
+
+#### Kali apt 换源
+```bash
+tee /etc/apt/sources.list <<-'EOF'
+
+# 阿里源
+deb https://mirrors.aliyun.com/kali kali-rolling main non-free contrib
+deb-src https://mirrors.aliyun.com/kali kali-rolling main non-free contrib
 
 # 清华源
 deb http://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-free
@@ -1403,27 +1588,8 @@ deb-src https://mirrors.tuna.tsinghua.edu.cn/kali kali-rolling main contrib non-
 deb http://http.kali.org/kali kali-rolling main non-free contrib
 deb-src http://http.kali.org/kali kali-rolling main non-free contrib
 
-# 中科大
-deb http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
-deb-src http://mirrors.ustc.edu.cn/kali kali-rolling main non-free contrib
-
 EOF
 apt update
-```
-
-**enable the "Universe" repository**
-```bash
-add-apt-repository universe
-apt-get update
-```
-
-**Gdebi**
-
-> Gdebi 是一个安装 .deb 软件包的工具.提供了图形化的使用界面
-
-```bash
-apt update
-apt install -y gdebi
 ```
 
 ### Binary
@@ -1556,46 +1722,47 @@ enabled=1					# 开启本地源
 yum list    #  看一下包
 ```
 
-**配置 Alibaba yum 源**
+#### 配置 yum 源
 
-直接下载源
+**8**
+```bash
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-8.repo
+```
+
+**7**
 ```bash
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
 ```
 
-刷新 YUM 的缓存状态:
+**6**
+```bash
+wget -O /etc/yum.repos.d/CentOS-Base.repo https://mirrors.aliyun.com/repo/Centos-6.repo
+```
+
+**刷新 YUM 的缓存状态**
 ```bash
 yum clean all
 yum makecache
 ```
 
-**配置 EPEL 源**
+#### 配置 EPEL 源
 
-- tuna
+**RHEL 8**
+```bash
+yum install -y https://mirrors.aliyun.com/epel/epel-release-latest-8.noarch.rpm
+sed -i 's|^#baseurl=https://download.fedoraproject.org/pub|baseurl=https://mirrors.aliyun.com|' /etc/yum.repos.d/epel*
+sed -i 's|^metalink|#metalink|' /etc/yum.repos.d/epel*
+```
 
-	这里使用 tuna 的 epel 镜像。
-	```bash
-	yum install -y epel-release
-	```
+**RHEL 7**
+```bash
+curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
+```
 
-	当前 tuna 已经在 epel 的官方镜像列表里，所以不需要其他配置，mirrorlist 机制就能让你的服务器就近使用 tuna 的镜像。如果你想强制 你的服务器使用 tuna 的镜像，可以修改 `/etc/yum.repos.d/epel.repo`，将 mirrorlist 和 metalink 开头的行注释掉。
-
-	接下来，取消注释这个文件里 baseurl 开头的行，并将其中的 http://download.fedoraproject.org/pub 替换成 https://mirrors.tuna.tsinghua.edu.cn
-	```bash
-	sed -e 's!^metalink=!#metalink=!g' \
-		-e 's!^#baseurl=!baseurl=!g' \
-		-e 's!//download\.fedoraproject\.org/pub!//mirrors.tuna.tsinghua.edu.cn!g' \
-		-e 's!http://mirrors\.tuna!https://mirrors.tuna!g' \
-		-i /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel-testing.repo
-	```
-
-	运行 `yum update & yum makecache` 测试一下
-
-- aliyun
-	```
-	curl -o /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-7.repo
-	yum clean all && yum makecache
-	```
+**RHEL 6**
+```bash
+wget -O /etc/yum.repos.d/epel.repo http://mirrors.aliyun.com/repo/epel-6.repo
+```
 
 ### 常用软件
 
@@ -1745,7 +1912,7 @@ timedatectl
 
 **修改时区**
 ```bash
-timedatectl set-timezone Asia/Shanghai
+timedatectl set-timezone Asia/Shanghai		# 将时区设置为 Asia/Shanghai
 
 或
 
@@ -1834,6 +2001,8 @@ vim /etc/crontab		# 编辑系统任务调度的配置文件
 30 6 */10 * * ls						# 意思是每月 1、11、21、31 日的 6:30 执行一次 ls 命令
 ```
 
+可以使用在线的 CRON 表达式工具辅助 : https://tool.lu/crontab/
+
 **at**
 
 > 在特定的时间执行一次性的任务
@@ -1892,7 +2061,7 @@ passwd <username>					# 设置用户密码
 
 userdel <username>					# 只删除用户不删除家目录
 userdel -r <username>				# 同时删除家目录
-userdel -f <username>				# 强制删除,即使用户还在登陆中
+userdel -f <username>				# 强制删除,即使用户还在登录中
 
 usermod -g <groupname> <username>	# 修改用户的主组
 usermod -G <supplementary> <username>	# 修改用户的附加组
@@ -1910,6 +2079,17 @@ passwd								# 配置 su 密码
 
 su <username>						# 切换账号
 su - <username>                     # 切换账号并改变工作目录至使用者的家目录
+
+compgen -c                  		# 列出所有可用的命令
+
+ulimit								# 查看、设置、获取文件打开的状态和配置详情
+	ulimit -a                   	# 显示登录用户的资源限制
+	ulimit -n 						# 显示打开文件数限制
+	ulimit -c 						# 显示核心转储文件大小
+	ulimit -u 						# 显示登录用户的最大用户进程数限制
+	ulimit -f 						# 显示用户可以拥有的最大文件大小
+	ulimit -m 						# 显示登录用户的最大内存大小
+	ulimit -v 						# 显示最大内存大小限制
 ```
 
 **组**
@@ -2020,7 +2200,7 @@ setfacl -b <File/Folder>				# 删除 ACL
 	ps -l 			# 长格式显示详细的信息
 	ps -a 			# 显示一个终端的所有进程，除会话引线外
 	ps -A 			# 显示所有进程信息
-	ps –u root 		# 指定用户的所有进程信息
+	ps -u root 		# 指定用户的所有进程信息
 	ps -e 			# 显示所有进程信息
 	ps aux 			# 查看系统中所有的进程显示所有包含其他使用者的行程
 	ps -axjf 		# 以程序树的方式显示
@@ -2067,6 +2247,12 @@ watch <Command>		# 以周期性的方式执行给定的指令,指令输出以全
 		kill -HUP <pid>						# 更改配置而不需停止并重新启动服务
 		kill -9 <PID> && kill -KILL <pid>	# 信号(SIGKILL)无条件终止进程
 	killall <PID>							# 使用进程的名称来杀死进程
+	```
+
+- pkill
+	```bash
+	# pkill 用于杀死一个进程，与 kill 不同的是它会杀死指定名字的所有进程
+	pkill -9 php-fpm	# 结束所有的 php-fpm 进程
 	```
 
 ```bash
@@ -2156,16 +2342,46 @@ dmesg 可用于找出内核最新消息中的错误和警告
 dmesg | less
 ```
 
+**nmi_watchdog**
+
+“看门狗NMI中断”的机制。（NMI：Non Maskable Interrupt. 这种中断即使在系统被锁住时，也能被响应）。这种机制可以被用来调试内核锁住现象。通过周期性地执行NMI中断，内核能够监测到是否有CPU被锁住。当有处理器被锁住时，打印调试信息。
+```bash
+echo '0' >/proc/sys/kernel/nmi_watchdog 			# 关闭linux 看门狗
+echo 'kernel.nmi_watchdog=0' >>/etc/sysctl.conf   	# 重启自动关闭
+```
+
 ---
 
 ## 设备管理
 
-**查看硬件信息**
+更多内容见笔记 [信息](./笔记/信息.md#硬件)
+
+### 内存
+
+**虚拟内存**
+
 ```bash
-lspci	# 打印有关系统中所有 PCI 总线和设备的详细信息
-lsmod	# 显示可加载内核模块
-lsusb	# 查看 usb 设备
-lsblk	# 列出所有可用块设备的信息
+free -h	# 查看 swap 分区
+vmstat
+swapon -s
+```
+
+如果机器没有安装 swap 分区可以自己分配一个
+```bash
+# 创建一个swap文件,大小为1G
+dd if=/dev/zero of=/home/f8xswap bs=1M count=1024
+
+# 将文件格式转换为swap格式的
+mkswap /home/f8xswap
+
+# 把这个文件分区挂载swap分区
+swapon /home/f8xswap
+
+```
+
+长期挂载
+```
+echo "/home/f8xswap swap swap default 0 0" >> /etc/fstab
 ```
 
 ### 磁盘
@@ -2195,16 +2411,6 @@ fdisk /dev/sdb		# 创建系统分区
 	w	# 写入分区表
 ```
 
-如果机器没有安装 swap 分区可以自己分配一个
-```bash
-dd if=/dev/zero of=/home/swap bs=1024 count=512000
-/sbin/mkswap /home/swap
-/sbin/swapon /home/swap
-```
-```bash
-free -h	# 查看 swap 分区
-```
-
 **挂载**
 ```bash
 cat /etc/fstab
@@ -2216,6 +2422,8 @@ mount -t vfstype				# 指定文件系统的类型,通常不必指定.mount 会�
 
 vi /etc/fstab					# 自动挂载
 /dev/cdrom /mnt/cdrom iso9660 defaults 0 0
+
+findmnt							# 显示Linux中当前挂载的文件系统
 ```
 
 **删除**
@@ -2415,6 +2623,13 @@ dd [options]
 	blkid -U d3b1dcc2-e3b0-45b0-b703-d6d0d360e524
 	blkid -po udev /dev/sda1	# 获取更多详细信息
 	blkid -g					# 清理 blkid 的缓存
+	```
+
+- partx
+	```bash
+	# 显示磁盘上分区的存在和编号
+	partx --show /dev/sda
+	partx --show /dev/sda1
 	```
 
 ---

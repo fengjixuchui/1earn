@@ -30,6 +30,7 @@
 - [Burp Suite使用的几个小技巧【更新】](https://www.t00ls.net/thread-49051-1-1.html)
 - [基于BurpSuit插件打造渗透测试自动化之路](https://www.freebuf.com/sectool/243617.html)
 - [某次burp抓包出错的解决办法](https://www.cnblogs.com/cwkiller/p/13846754.html)
+- [每天一个BP小技巧](https://mp.weixin.qq.com/s/j6x28xHln3guULkPLdat5w)
 
 ---
 
@@ -192,7 +193,7 @@ Site Map 的左边为访问的 URL,按照网站的层级和深度,树形展示�
 
 **右键--Compare site maps**
 
-站点比较是一个 Burp 提供给渗透测试人员对站点进行动态分析的利器,我们在比较帐号权限时经常使用到它.当我们登陆应用系统,使用不同的帐号,帐号本身在应用系统中被赋予了不同的权限,那么帐号所能访问的功能模块、内容、参数等都是不尽相同的,此时使用站点比较,能很好的帮助渗透测试人员区分出来.一般来说,主要有以下3种场景:
+站点比较是一个 Burp 提供给渗透测试人员对站点进行动态分析的利器,我们在比较帐号权限时经常使用到它.当我们登录应用系统,使用不同的帐号,帐号本身在应用系统中被赋予了不同的权限,那么帐号所能访问的功能模块、内容、参数等都是不尽相同的,此时使用站点比较,能很好的帮助渗透测试人员区分出来.一般来说,主要有以下3种场景:
 1. 同一个帐号,具有不同的权限,比较两次请求结果的差异.
 2. 两个不同的帐号,具有不同的权限,比较两次请求结果的差异.
 3. 两个不同的帐号,具有相同的权限,比较两次请求结果的差异.
@@ -276,6 +277,10 @@ Target Scope 中作用域的定义比较宽泛,通常来说,当我们对某个�
 **右键--Do intercept**
 
 拦截回包
+
+**快捷键**
+
+解码：ctrl+shift+u
 
 ## Options
 
@@ -752,7 +757,7 @@ Burp Decoder 的功能比较简单,作为 Burp Suite 中一款编码解码工具
 `差异比对模块`
 
 Burp Comparer 在 Burp Suite 中主要提供一个可视化的差异比对功能,来对比分析两次数据之间的区别.使用中的场景可能是:
-1. 枚举用户名过程中,对比分析登陆成功和失败时,服务器端反馈结果的区别.
+1. 枚举用户名过程中,对比分析登录成功和失败时,服务器端反馈结果的区别.
 2. 使用 Intruder 进行攻击时,对于不同的服务器端响应,可以很快的分析出两次响应的区别在哪里.
 3. 进行 SQL 注入的盲注测试时,比较两次响应消息的差异,判断响应结果与注入条件的关联关系.
 
@@ -801,6 +806,22 @@ Burp Comparer 在 Burp Suite 中主要提供一个可视化的差异比对功能
 
 # User options
 
+**Plaform Authentication**
+
+通过这些设置，可以配置 Burp 自动对目标 Web 服务器平台进行认证。可以为各个主机配置不同的身份验证类型和凭证。
+
+支持的认证类型有：basic 基本认证、NTLMv1、NTLMv2 和摘要认证。域名和主机名字段仅用于 NTLM 身份验证。
+
+"Prompt for credentials on platform authentication failure" 选项会使 Burp 在遇到身份验证失败时显示一个交互式弹出窗口。
+
+例如遇到需要 NTLM 认证后，才能访问系统的目标
+
+![](../../../assets/img/Security/安全工具/BurpSuite/39.png)
+
+添加新的配置，认证方式选择 NTLMv2，然后重新发送请求就 ok 了
+
+![](../../../assets/img/Security/安全工具/BurpSuite/40.png)
+
 **Upstream Proxy Servers**
 
 ![](../../../assets/img/Security/安全工具/BurpSuite/15.png)
@@ -809,8 +830,55 @@ Burp Comparer 在 Burp Suite 中主要提供一个可视化的差异比对功能
 
 ---
 
-**Source & Reference**
-- [关于Burp Suite不能抓包的解决方法](https://blog.csdn.net/u011781521/article/details/54971084)
-- [使用 Burp suite 爆破 HTTP Basic 认证](https://xiaix.me/shi-yong-burp-suite-bao-po-http-basic-ren-zheng/)
-- [kali 安装新版本burp 以及不能使用重新安装jdk的解决方法](https://blog.csdn.net/nzjdsds/article/details/81205184)
-- [Intercepting HSTS protected traffic using Burp suite and Firefox](https://abhijith.live/intercepting-hsts-protected-traffic-using-burp-suite-and-firefox/)
+# 通过 proxifier 分流 burp
+
+在渗透测试时，我们常遇到出现浏览器自己本身的包，以及一些不相干的网站流量的情况，如何避免，或者一劳永逸的解决呢？
+
+在 Intercept Client Requests 配置忽略是一个方法,但是这个选项不支持批量导入
+
+![](../../../assets/img/Security/安全工具/BurpSuite/41.png)
+
+TLS Pass Through 支持批量导入,但又不是我需要的功能
+
+![](../../../assets/img/Security/安全工具/BurpSuite/42.png)
+
+不如换一种思路, 如果 burp 不能做到这种操作，我在流量到达 burp 前做个分流不就可以了嘛。
+
+proxifier 是我们平时常用的 windows 端全局代理工具，通过配置 rule 可以轻松获得干净的 burp 流量
+
+要求做到
+- 命中规则的走 1080，就是在 burp 中看不到这个流量
+- 未名字规则的 走 8080,burp 上可以看到
+
+先创建代理服务器
+
+![](../../../assets/img/Security/安全工具/BurpSuite/43.png)
+
+然后创建规则
+
+![](../../../assets/img/Security/安全工具/BurpSuite/44.png)
+
+再创建一个默认的发给 burp
+
+![](../../../assets/img/Security/安全工具/BurpSuite/45.png)
+
+顺序如下,注意,顺序从上至下执行，非常重要，不能乱!!!!
+
+![](../../../assets/img/Security/安全工具/BurpSuite/46.png)
+
+如果这里面 rule burp 在上面那么,any 优先匹配, rule 1080就永远不会执行了
+
+同样,Defalut 规则也尽量不要做修改。
+
+这时候,chrome浏览器中默认所有流量全部发向 8080 口,而命中规则的流量发给 1080 ，再规则里配置你不想看到的域名即可，我个人的规则如下
+- https://github.com/ffffffff0x/AboutSecurity/blob/master/Payload/Burp/Proxifier_filter.txt
+
+效果
+
+![](../../../assets/img/Security/安全工具/BurpSuite/47.png)
+
+google 命中规则，发向 1080
+
+freebug 未命中规则，发向 8080
+
+完美, 一劳永逸的解决了所有问题, 更换 burp 版本也不受影响

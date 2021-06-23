@@ -223,6 +223,7 @@
 **文章**
 - [挖洞技巧:绕过短信&邮箱轰炸限制以及后续](https://www.secpulse.com/archives/67077.html)
 - [验证码安全那些事](https://www.freebuf.com/news/131542.html)
+- [实战笔记：滑动验证码攻防对抗](https://www.freebuf.com/articles/web/238038.html)
 
 **验证码暴力破解**
 - 使用 burp 对特定的验证码进行暴力破解
@@ -343,6 +344,12 @@
 如果登录系统设置了 IP 地址白名单,我们可以通过修改 http 头字段伪造 IP 地址
 - [Fuzz_head](https://github.com/ffffffff0x/AboutSecurity/blob/master/Dic/Web/HTTP/Fuzz_head.txt)
 
+或者直接修改 host 头
+```
+curl -v -H "Host: localhost" https://target/
+wget -d --header="Host: localhost" https://target/
+```
+
 ---
 
 ## 时间限制绕过
@@ -378,7 +385,7 @@
 - [$36k Google App Engine RCE](https://www.ezequiel.tech/p/36k-google-app-engine-rce.html)
 
 **学习资源**
-- [smodnix/31-days-of-API-Security-Tips](https://github.com/smodnix/31-days-of-API-Security-Tips)
+- [inonshk/31-days-of-API-Security-Tips](https://github.com/inonshk/31-days-of-API-Security-Tips)
 - [31 Days of API Security](https://docs.google.com/spreadsheets/d/1jn3JnWzQFZW41gKo5Fhxwf2ke2w-pvrpCGhBmKhyIBE/edit#gid=0)
 
 ## BOLA
@@ -427,6 +434,7 @@
 - JSON 对象
     - `{"id":xxx}`
     - `{"id":{"id":xxx}}`
+    - `{"id":{"id":[xxx]}}`
 - 去 JSON
     - `{"id":xxx}`
     - `id=xxx`
@@ -474,6 +482,10 @@
     - [destoon无限制增加帐号资金 ](http://www.anquan.us/static/bugs/wooyun-2014-050481.html)
     - [大疆某处支付逻辑漏洞可1元买无人机](http://www.anquan.us/static/bugs/wooyun-2016-0194751.html)
     - [挖掘网站支付漏洞中突然想到的一个骚思路](https://www.t00ls.net/thread-53256-1-2.html)
+
+- Tips:
+    - 数量改为小数、负数、0
+    - 同时购买多个物品,部分商品数量改为负数
 
 **商品数量篡改**
 

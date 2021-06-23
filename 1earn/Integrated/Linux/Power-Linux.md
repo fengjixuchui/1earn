@@ -35,6 +35,7 @@
 
 * **[🍜 网络服务](#网络服务)**
   * [AdguardTeam](#adguardteam)
+  * [butterfly](#butterfly)
   * [Cacti](#cacti)
   * [Chrony](#chrony)
   * [cloud-torrent](#cloud-torrent)
@@ -83,6 +84,7 @@
   * [filebrowser](#filebrowser)
   * [NFS](#nfs)
   * [Samba](#samba)
+  * [sharry](#sharry)
   * [Vsftp](#vsftp)
 
 * **[🍗 编程语言](#编程语言)**
@@ -108,6 +110,7 @@
 * **[🌭 容器 & 虚拟化](#容器&虚拟化)**
   * [Docker](#docker)
     * [Docker-Compose](#docker-compose)
+    * [Docker-Portainer](#docker-portainer)
   * [QEMU](#qemu)
 
 * **[🥕 分布式](#分布式)**
@@ -383,7 +386,7 @@ vimdiff  FILE_LEFT  FILE_RIGHT
 **安装**
 ```bash
 mkdir -p /opt/adguard && cd /opt/adguard
-wget https://github.com/AdguardTeam/AdGuardHome/releases/download/v0.105.0-beta.1/AdGuardHome_linux_amd64.tar.gz
+wget https://github.com/AdguardTeam/AdGuardHome/releases/download/v0.105.0-beta.2/AdGuardHome_linux_amd64.tar.gz
 tar -xzvf AdGuardHome_linux_amd64.tar.gz
 cd AdGuardHome
 ./AdGuardHome -s install
@@ -415,6 +418,11 @@ vim AdGuardHome.yaml
 ```bash
 ./AdGuardHome -s restart
 ```
+
+**Tips**
+
+配合下列项目获得更好的体验
+- https://github.com/privacy-protection-tools/anti-AD
 
 ---
 
@@ -925,10 +933,9 @@ firewall-cmd --reload
 
 **服务端安装**
 ```bash
-wget https://github.com/fatedier/frp/releases/download/v0.32.0/frp_0.32.0_linux_amd64.tar.gz
-tar -zxvf frp_0.32.0_linux_amd64.tar.gz
-cd frp_0.32.0_linux_amd64
-rm -rf frpc*
+wget https://github.com/fatedier/frp/releases/download/v0.34.3/frp_0.34.3_linux_amd64.tar.gz
+tar -zxvf frp_0.34.3_linux_amd64.tar.gz
+cd frp_0.34.3_linux_amd64
 ```
 
 编辑 frps 配置文件
@@ -1184,6 +1191,12 @@ systemctl stop firewalld
 **官网**
 - https://openvpn.net/
 
+**快速安装脚本**
+- [Nyr/openvpn-install](https://github.com/Nyr/openvpn-install)
+  ```bash
+  wget https://git.io/vpn -O openvpn-install.sh && bash openvpn-install.sh
+  ```
+
 **centos 下安装 OpenVPN**
 
 - **前期准备**
@@ -1278,7 +1291,7 @@ systemctl stop firewalld
 
   **制作 Client 端证书**
 
-  每一个登陆的VPN客户端需要有一个证书，每个证书在同一时刻只能供一个客户端连接
+  每一个登录的VPN客户端需要有一个证书，每个证书在同一时刻只能供一个客户端连接
   ```bash
   ./easyrsa gen-req zhangsan nopass
   ./easyrsa sign-req client zhangsan
@@ -1736,7 +1749,7 @@ socks5 127.0.0.1 1080   # 改成你懂的
 
 **Kali/Manjaro**
 
-安装完毕后会自动启动,但是没有配置配置文件会无法登陆,修改下配置文件
+安装完毕后会自动启动,但是没有配置配置文件会无法登录,修改下配置文件
 ```vim
 echo "PermitRootLogin yes" >> /etc/ssh/sshd_config
 echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
@@ -1760,7 +1773,7 @@ ssh-keygen -t dsa -f /etc/ssh/ssh_host_rsa_key
 
 **Ubuntu**
 
-如果没有就装一下,如果你只是想登陆别的机器的 SSH 只需要安装 openssh-client (ubuntu 有默认安装,如果没有则 `apt install -y openssh-client`) ,如果要使本机开放 SSH 服务就需要安装 openssh-server
+如果没有就装一下,如果你只是想登录别的机器的 SSH 只需要安装 openssh-client (ubuntu 有默认安装,如果没有则 `apt install -y openssh-client`) ,如果要使本机开放 SSH 服务就需要安装 openssh-server
 ```bash
 apt install -y openssh-client=1:7.2p2-4ubuntu2.8
 apt install -y openssh-server=1:7.2p2-4ubuntu2.8
@@ -1803,7 +1816,7 @@ echo "PasswordAuthentication yes" >> /etc/ssh/sshd_config
 0. 先排查是不是客户端(自己)的问题,再排查是不是服务端(对面)的问题,最后在排查是不是传输中(中间)的问题.
 1. ping 试试,如果网络层可通,那么大概率是应用层的问题,检查 SSH 配置,是否有白名单限制,或者你他娘的意大利防火墙或 selinux 就没放行
 2. 假设这么一种情况,应用层配置正常,主机一切正常,但路由器/交换机在 ACL 上禁用了 SSH 的流量,这样就是传输层的问题了.内网 IPS/IDS 阻断同理.
-4. 麻烦你看下账号密码是不是写错了谢谢.或者是不是限制只使用密钥登陆的.
+4. 麻烦你看下账号密码是不是写错了谢谢.或者是不是限制只使用密钥登录的.
 5. 注意下是不是配置文件或服务看错了是 sshd 不是 ssh
 
 **motd**
@@ -2280,11 +2293,12 @@ forever -h                # 查看帮助
 
 - **源代码编译安装**
 
-  自己下载好包 https://nginx.org/en/download.html,传到服务器上,这里以1.14.2 举例
+  自己下载好包 https://nginx.org/en/download.html ,传到服务器上,这里以 1.16.1 举例
 
   ```bash
-  tar -zxvf nginx-1.14.2.tar.gz
-  cd nginx-1.14.2/
+  wget https://nginx.org/download/nginx-1.16.1.tar.gz
+  tar -zxvf nginx-1.16.1.tar.gz
+  cd nginx-1.16.1/
   ./configure
   make
   make install
@@ -2465,7 +2479,6 @@ rabbitmqctl set_user_tags [账号] administrator          # 修改用户角色
 
 ---
 
-
 ## searx
 
 <p align="center">
@@ -2486,7 +2499,11 @@ rabbitmqctl set_user_tags [账号] administrator          # 修改用户角色
 add-apt-repository universe
 apt-get update
 
-apt-get install -y git build-essential libxslt-dev python-dev python-virtualenv python-babel zlib1g-dev libffi-dev libssl-dev vim lrzsz unzip
+sudo -H apt-get install -y \
+    python3-dev python3-babel python3-venv \
+    uwsgi uwsgi-plugin-python3 \
+    git build-essential libxslt-dev zlib1g-dev libffi-dev libssl-dev \
+    shellcheck
 ```
 
 安装 searx
@@ -3857,7 +3874,8 @@ firewall-cmd --reload
 **安装**
 
 ```bash
-curl -fsSL https://filebrowser.xyz/get.sh | bash
+curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash
+filebrowser -r /path/to/your/files
 ```
 
 **使用**
@@ -4018,6 +4036,24 @@ mount -t cifs -o username=smb1,password='smb123456' //192.168.xx+1.xx/webdata /d
 **更多配置案例**
 
 见 [Samba.md](./实验/Samba.md)
+
+---
+
+## sharry
+
+**官网**
+- https://github.com/eikek/sharry
+
+**安装**
+```bash
+cd /tmp
+wget https://github.com/eikek/sharry/releases/download/release%2F1.6.0/sharry-restserver-1.6.0.zip
+unzip sharry-restserver-1.6.0.zip
+mv sharry-restserver-1.6.0 sharry
+/tmp/sharry/bin/sharry-restserver
+```
+
+访问 http://localhost:9090/
 
 ---
 
@@ -4337,60 +4373,71 @@ go build
     <img src="../../../assets/img/logo/java.svg" width="10%">
 </p>
 
-**rpm 包方式安装**
+**oracle jdk**
 
-下载
-https://www.oracle.com/technetwork/java/javase/downloads/
-```bash
-chmod +x jdk-****.rpm
-yum localinstall jdk-****.rpm
-# 也可以
-rpm -ivh jdk-****.rpm
-```
+- **rpm 包方式安装**
+
+  下载
+  https://www.oracle.com/technetwork/java/javase/downloads/
+  ```bash
+  chmod +x jdk-****.rpm
+  yum localinstall jdk-****.rpm
+  # 也可以
+  rpm -ivh jdk-****.rpm
+  ```
+
+- **使用 ppa/源方式安装 oracle 官方版本 jdk**
+  ```bash
+  # 添加 ppa
+  apt-get install -y python-software-properties
+  add-apt-repository ppa:webupd8team/java
+  apt-get update
+
+  # 安装 jdk7
+  apt-get install -y oracle-java7-installer
+
+  # 安装 jdk8
+  apt-get install -y oracle-java8-installer
+  ```
+
+- **直接使用编译完成的**
+
+  自行下载 [oracle jdk](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+
+  这里以 `jdk-8u212-linux-x64.tar.gz` 举例
+
+  ```bash
+  tar -xzvf jdk-8u212-linux-x64.tar.gz
+
+  mkdir /usr/local/java/
+
+  mv jdk1.8.0_212/ /usr/local/java
+
+  export JAVA_HOME=/usr/local/java/jdk1.8.0_212
+  export JRE_HOME=${JAVA_HOME}/jre
+  export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
+  export PATH=${JAVA_HOME}/bin:$PATH
+
+  source /etc/profile
+
+  ln -s /usr/local/java/jdk1.8.0_212/bin/java /usr/bin/java
+  ```
 
 **Openjdk**
-```bash
-apt-get update
-apt-get install -y openjdk-8-jdk
-java -version
-```
 
-**使用 ppa/源方式安装 oracle 官方版本 jdk**
-```bash
-# 添加 ppa
-apt-get install -y python-software-properties
-add-apt-repository ppa:webupd8team/java
-apt-get update
+- Red Hat系
+  ```bash
+  yum install java-1.8.0-openjdk java-1.8.0-openjdk-devel
+  java -version
+  ```
 
-# 安装 jdk7
-apt-get install -y oracle-java7-installer
-
-# 安装 jdk8
-apt-get install -y oracle-java8-installer
-```
-
-**直接使用编译完成的**
-
-自行下载 [oracle jdk](https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-
-这里以 `jdk-8u212-linux-x64.tar.gz` 举例
-
-```bash
-tar -xzvf jdk-8u212-linux-x64.tar.gz
-
-mkdir /usr/local/java/
-
-mv jdk1.8.0_212/ /usr/local/java
-
-export JAVA_HOME=/usr/local/java/jdk1.8.0_212
-export JRE_HOME=${JAVA_HOME}/jre
-export CLASSPATH=.:${JAVA_HOME}/lib:${JRE_HOME}/lib
-export PATH=${JAVA_HOME}/bin:$PATH
-
-source /etc/profile
-
-ln -s /usr/local/java/jdk1.8.0_212/bin/java /usr/bin/java
-```
+- Debian 系
+  ```bash
+  apt-get update
+  apt-get install -y openjdk-8-jdk
+  # 或 apt-get install openjdk-11-jdk
+  java -version
+  ```
 
 **测试**
 ```bash
@@ -4408,6 +4455,11 @@ javac
 
 **官网**
 - https://www.perl.org/
+
+**安装**
+```bash
+sh <(curl -q https://platform.activestate.com/dl/cli/install.sh) --activate-default ActiveState/ActivePerl-5.28
+```
 
 **安装模块**
 ```bash
@@ -4538,9 +4590,9 @@ jupyter-labextension uninstall my-extension   # 卸载已安装扩展
 
 下载 ruby 安装包,并进行编译安装
 ```bash
-wget https://cache.ruby-lang.org/pub/ruby/2.6/ruby-2.6.2.tar.gz
-tar xvfvz ruby-2.6.2.tar.gz
-cd ruby-2.6.2
+wget https://cache.ruby-lang.org/pub/ruby/3.0/ruby-3.0.0.tar.gz
+tar xvfvz ruby-3.0.0.tar.gz
+cd ruby-3.0.0
 ./configure
 make
 make install
@@ -4613,16 +4665,14 @@ cargo clean               # 清理目录
 - https://github.com/aaPanel/BaoTa
 
 **安装**
-- **Centos**
-
+- Centos/Fedora
   ```bash
-  yum install -y wget && wget -O install.sh http://download.bt.cn/install/install_6.0.sh && sh install.sh
+  wget -O install.sh http://download.bt.cn/install/install_6.0.sh && sh install.sh
   ```
 
-- **Ubuntu/Debian**
-
+- Ubuntu/Debian/Deepin
   ```bash
-  wget -O install.sh http://download.bt.cn/install/install-ubuntu_6.0.sh && bash install.sh
+  wget -O install.sh http://download.bt.cn/install/install-ubuntu_6.0.sh && sudo bash install.sh
   ```
 
 **使用**
@@ -5018,6 +5068,10 @@ setenforce 0    # 关闭 selinux
 - https://www.docker.com
 
 **安装**
+- **官方一条命令版(不兼容 kali)**
+  ```bash
+  curl -sSL https://get.docker.com/ | sh
+  ```
 
 - **CentOS7 下安装**
   ```bash
@@ -5054,7 +5108,7 @@ setenforce 0    # 关闭 selinux
   apt install -y docker-ce
   docker version
   systemctl start docker
-  docker login  # 讲道理,按官方文档说法并不需要账户并且登录,但有时候还是需要你登陆
+  docker login  # 讲道理,按官方文档说法并不需要账户并且登录,但有时候还是需要你登录
   ```
 
 **使用**
@@ -5079,12 +5133,14 @@ setenforce 0    # 关闭 selinux
   ```bash
   docker version                              # 查看 docker 版本
   docker run -it [docker_id] bash             # 运行一个容器实例
+  docker run -d -p 物理端口1:容器端口1 -p 物理端口2:物理端口2 --name 容器名 <image-name>:<tag>
     docker run --name=test -p 1234:1234 -itd ubuntu /bin/bash
     # 使用本地 1234 端口连接 docker 的 1234 端口运行 ubuntu 镜像，并将其临时命名为 test
     # test：为临时名称，可以自定义填写。
     # -p： 第一个端口为本机的端口，第二个端口为 Docker 的端口。
     # -itd：意思是在后台运行，交互式运行，并且输出当前的信息
     # /bin/bash：调用 Shell
+    docker run -d -p 8080:80 -v 本机路径:容器路径 --name 容器名  <image-name>:<tag> # 磁盘挂载
   docker stop [docker_name/docker_id]               # 停止容器
   docker start [options] container [container...]   # 启动一个或多个已停止的容器
   docker exec -it [docker_id] bash                  # 获取容器的 shell
@@ -5109,6 +5165,33 @@ setenforce 0    # 关闭 selinux
   docker rmi -f [docker_image_id]                   # 删除本地的 docker 镜像
   ```
 
+- 打包上传
+  ```bash
+  # 容器打包镜像
+  docker commit -a "作者" -m "备注" 容器ID <image-name>:<tag>
+
+  # 将容器打包成规范的镜像
+  docker commit -m <exiting-Container> <hub-user>/<repo-name>[:<tag>]
+
+  # 登录 Docker Hub
+  docker login
+
+  # 上传推送镜像到公共仓库
+  docker push <hub-user>/<repo-name>:<tag>
+
+  # 当前目录的 Dockerfile 创建镜像
+  docker build -t <image-name>:<tag> .
+
+  # 指定文件构建镜像
+  docker build -f /path/to/a/Dockerfile -t <image-name>:<tag> .
+
+  # 将镜像保存 tar 包
+  docker save -o image-name.tar <image-name>:<tag>
+
+  # 导入 tar 镜像
+  docker load --input image-name.tar
+  ```
+
 - 默认情况下,只有管理员权限能够运行 docker 命令.考虑到安全问题,你不会想用 root 用户或使用 sudo 来运行 Docker 的.要解决这个问题,你需要将自己的用户加入到 docker 组中.
   ```bash
   usermod -a -G docker $USER
@@ -5122,6 +5205,9 @@ setenforce 0    # 关闭 selinux
 
 **加速**
 - [Docker 镜像加速](../../Plan/Misc-Plan.md#Docker)
+
+**实验**
+- [Docker](./实验/Docker.md)
 
 **常见报错**
 - Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
@@ -5162,6 +5248,11 @@ mv docker-compose-Linux-x86_64 /usr/local/bin/docker-compose
 chmod +x /usr/local/bin/docker-compose
 ```
 
+或直接采用 pip 安装
+```bash
+pip3 install docker-compose
+```
+
 ```bash
 docker-compose build
 docker-compose up -d
@@ -5192,6 +5283,10 @@ docker-compose exec [service] sh  # 进入容器内
   nameserver 1.1.1.1
   ```
 
+- [3927] Error loading Python lib '/tmp/_MEIuQps8Y/libpython3.9.so.1.0': dlopen: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.28' not found (required by /tmp/_MEIuQps8Y/libpython3.9.so.1.0)
+
+  python 版本的问题, 换 python3.7 以上或用 pip 安装即可
+
 ### Docker-Portainer
 
 <p align="center">
@@ -5207,7 +5302,7 @@ docker-compose exec [service] sh  # 进入容器内
 ```bash
 docker pull portainer/portainer         # 拉取镜像
 docker volume create portainer_data
-docker run -d -p 9000:9000 --name portainer --restart always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer   # 部署
+docker run -d -p 8000:8000 -p 9000:9000 --name=portainer --restart=always -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce   # 部署
 ```
 访问 ip:9000 进入到设置密码界面.
 
@@ -5858,7 +5953,7 @@ vim /etc/phpldapadmin/config.php
 systemctl restart httpd
 ```
 
-访问 `http://ip/ldapadmin`，点击登陆。CN 填写域信息`cn=admin,dc=fox,dc=com`，密码填写自己设置的密码。
+访问 `http://ip/ldapadmin`，点击登录。CN 填写域信息`cn=admin,dc=fox,dc=com`，密码填写自己设置的密码。
 
 ---
 

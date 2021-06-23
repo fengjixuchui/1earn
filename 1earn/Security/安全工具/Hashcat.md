@@ -214,7 +214,7 @@ source.txt 你要爆破的 hash 列表
 pass01.txt 你的密码表
 ```
 
-![](../../../assets/img/Security/实验/靶机/VulnHub/DC/DC1/9.png)
+![](../../../assets/img/Security/安全资源/靶机/VulnHub/DC/DC1/9.png)
 
 ---
 
@@ -240,6 +240,26 @@ b4b9b02e6f09a9bd760f388b67351e2b
 ```
 
 ---
+
+## Domain Cached Credentials 2 (DCC2), MS Cache 2
+
+应用于 mscash
+
+```bash
+MODE: 2100
+TYPE: Domain Cached Credentials 2 (DCC2), MS Cache 2
+$DCC2$10240#tom#e4e938d12fe5974dc42a90120bd9c90f
+```
+
+## 爆破net-NTLMv1
+
+```bash
+hashcat -m 5500 hash.txt pass1.txt
+
+MODE: 5500
+TYPE: NetNTLMv1 / NetNTLMv1+ESS
+u4-netntlm::kNS:338d08f8e26de93300000000000000000000000000000000:9526fb8c23a90751cdd619b6cea564742e1e4bf33006ba41:cb8086049ec4736c
+```
 
 ## 爆破net-NTLMv2
 
@@ -652,7 +672,7 @@ test
 
 ![](../../../assets/img/Security/安全工具/Hashcat/5.png)
 
-服务的添加一个新的 voucher
+服务端添加一个新的 voucher
 
 ![](../../../assets/img/Security/安全工具/Hashcat/6.png)
 

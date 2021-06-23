@@ -24,7 +24,7 @@
 
 ## 项目文件一览
 
-* [Security](./1earn/Security/Power-PenTest.md)
+* **[Security](./1earn/Security/Power-PenTest.md)**
 
     * **[安全工具](https://github.com/No-Github/1earn/tree/master/1earn/Security/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7)** - 各类安全工具的使用介绍
 
@@ -37,9 +37,10 @@
                 * [Kioptrix Serial](./1earn/Security/安全资源/靶机/VulnHub/Kioptrix) - Kioptrix 系列靶场,难度简单至中等,推荐初学者挑战
                 * [Mission-Pumpkin](./1earn/Security/安全资源/靶机/VulnHub/Mission-Pumpkin) - 难度适中,偏向于加解密比较多,漏洞利用内容较少
                 * [symfonos Serial](./1earn/Security/安全资源/靶机/VulnHub/symfonos) - 挺有难度的靶场,内容丰富,难度中等,漏洞利用内容很多,推荐有一定经验者挑战
-            * [漏洞复现](https://github.com/No-Github/1earn/tree/master/1earn/Security/%E5%AE%89%E5%85%A8%E8%B5%84%E6%BA%90/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0) - 搭建环境,记录漏洞复现的过程
+        * [漏洞复现](https://github.com/No-Github/1earn/tree/master/1earn/Security/%E5%AE%89%E5%85%A8%E8%B5%84%E6%BA%90/%E6%BC%8F%E6%B4%9E%E5%A4%8D%E7%8E%B0) - 搭建环境,记录漏洞复现的过程
 
     * **BlueTeam**
+        * [分析](./1earn/Security/BlueTeam/分析.md) - 分析工具与分析案例
         * [加固](./1earn/Security/BlueTeam/加固.md) - 系统、应用加固的方法和工具资源
         * [监察](./1earn/Security/BlueTeam/监察.md) - 有关查杀、监控、蜜罐的资源
         * [取证](./1earn/Security/BlueTeam/取证.md) - 内容涉及操作系统的取证、web 的取证、文件的取证
@@ -65,6 +66,8 @@
         * 固件安全
             * [固件安全](./1earn/Security/IOT/固件安全/固件安全.md) - 记录 IOT 固件分析的知识点,包括固件提取、固件分析、固件解密等
             * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Security/IOT/%E5%9B%BA%E4%BB%B6%E5%AE%89%E5%85%A8/%E5%AE%9E%E9%AA%8C) - 分析固件实验
+        * 无线电安全
+            * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Security/IOT/%E6%97%A0%E7%BA%BF%E7%94%B5%E5%AE%89%E5%85%A8/%E5%AE%9E%E9%AA%8C)
         * 硬件安全
             * [Device-Exploits](./1earn/Security/IOT/硬件安全/Device-Exploits.md) - 嵌入式设备相关漏洞利用,不太熟悉这一块,内容不多
             * [HID](https://github.com/No-Github/1earn/tree/master/1earn/Security/IOT/%E7%A1%AC%E4%BB%B6%E5%AE%89%E5%85%A8/HID) - 和组员制作的 HID 实物记录
@@ -74,7 +77,7 @@
 
     * **Pwn**
         * 实验
-            * [SLMail溢出案例](./1earn/Security/Pwn/实验/SLMail溢出案例.md) - SLMail 5.5.0 的缓冲区溢出利用实验
+            * [SLMail溢出案例](./1earn/Security/PWN/实验/SLMail溢出案例.md) - SLMail 5.5.0 的缓冲区溢出利用实验
 
     * **RedTeam**
         * 安防设备
@@ -84,28 +87,38 @@
             * [后渗透](./1earn/Security/RedTeam/后渗透/后渗透.md) - 后渗透知识点的大纲
             * [权限提升](./1earn/Security/RedTeam/后渗透/权限提升.md) - 操作系统和数据库的提权方法
             * [权限维持](./1earn/Security/RedTeam/后渗透/权限维持.md) - 权限维持的各种方法和资源
+            * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/%E5%90%8E%E6%B8%97%E9%80%8F/%E5%AE%9E%E9%AA%8C)
         * 软件服务安全
             * [CS-Exploits](./1earn/Security/RedTeam/软件服务安全/CS-Exploits.md) - 收集软件、业务应用服务漏洞的渗透手段和 cve 漏洞
             * [DesktopApps-Exploits](./1earn/Security/RedTeam/软件服务安全/DesktopApps-Exploits.md) - 收集桌面软件的渗透手段和 cve 漏洞
         * 协议安全
             * [Protocol-Exploits](./1earn/Security/RedTeam/协议安全/Protocol-Exploits.md) - 按照协议归类各种漏洞、攻击手段
+            * [笔记](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/%E5%8D%8F%E8%AE%AE%E5%AE%89%E5%85%A8/%E7%AC%94%E8%AE%B0)
         * 信息收集
             * [端口安全](./1earn/Security/RedTeam/信息收集/端口安全.md) - 记录端口渗透时的方法和思路
             * [空间测绘](./1earn/Security/RedTeam/信息收集/空间测绘.md) - 收集搜索引擎语法资源
             * [信息收集](./1earn/Security/RedTeam/信息收集/信息收集.md) - 记录信息收集方面各类技术，如漏扫、IP 扫描、端口扫描、DNS 枚举、目录枚举、指纹等
+        * 语言安全
+            * [语言安全](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/%E8%AF%AD%E8%A8%80%E5%AE%89%E5%85%A8)
         * 云安全
             * [云安全](./1earn/Security/RedTeam/云安全/云安全.md) - 云主机利用工具,渗透案例,相关知识点
         * OS安全
             * [Linux安全](./1earn/Security/RedTeam/OS安全/Linux安全.md) - 包含 Linux 口令破解，漏洞利用、获取Shell
             * [OS-Exploits](./1earn/Security/RedTeam/OS安全/OS-Exploits.md) - 收集操作系统的 cve 漏洞
             * [Windows安全](./1earn/Security/RedTeam/OS安全/Windows安全.md) - 包含 windows pth、ptt，漏洞利用、提权、远程执行命令
+            * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/OS%E5%AE%89%E5%85%A8/%E5%AE%9E%E9%AA%8C)
         * Web 安全
-            * [IDOR](./1earn/Security/RedTeam/Web安全/IDOR.md) - 整个部分结构大部分基于乌云的几篇密码找回、逻辑漏洞类文章,在其基础上记录和归纳
+            * [前端攻防](./1earn/Security/RedTeam/Web安全/前端攻防.md) - 前端解密,绕过访问
             * [BS-Exploits](./1earn/Security/RedTeam/Web安全/BS-Exploits.md) - 全面收集 web 漏洞 POC | Payload | exp
+            * [IDOR](./1earn/Security/RedTeam/Web安全/IDOR.md) - 整个部分结构大部分基于乌云的几篇密码找回、逻辑漏洞类文章,在其基础上记录和归纳
             * [靶场](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/Web%E5%AE%89%E5%85%A8/%E9%9D%B6%E5%9C%BA)
-            * 语言特性
             * [Web_Generic](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/Web%E5%AE%89%E5%85%A8/Web_Generic)
             * [Web_Tricks](https://github.com/No-Github/1earn/tree/master/1earn/Security/RedTeam/Web%E5%AE%89%E5%85%A8/Web_Tricks)
+
+    * **Reverse**
+        * [Reverse](./1earn/Security/Reverse/Reverse.md)
+        * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Security/Reverse/%E5%AE%9E%E9%AA%8C)
+        * [FILE](https://github.com/No-Github/1earn/tree/master/1earn/Security/Reverse/FILE)
 
 * **Develop**
 
@@ -118,19 +131,11 @@
         * [Markdown](https://github.com/No-Github/1earn/tree/master/1earn/Develop/%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80/Markdown)
         * [XML](https://github.com/No-Github/1earn/tree/master/1earn/Develop/%E6%A0%87%E8%AE%B0%E8%AF%AD%E8%A8%80/XML)
 
-    * **[操作系统](https://github.com/No-Github/1earn/blob/master/1earn/Develop/%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F/)**
-
     * **可视化**
         * [gnuplot](https://github.com/No-Github/1earn/tree/master/1earn/Develop/%E5%8F%AF%E8%A7%86%E5%8C%96/gnuplot)
 
-    * **硬件**
-        * [硬件知识](./1earn/Develop/硬件/硬件知识.md) - 硬件相关的小知识
-
     * **正则**
         * [regex](./1earn/Develop/正则/regex.md) - 常用正则表达式和相关资源
-
-    * **字符编码**
-        * [字符编码](./1earn/Develop/字符编码/字符编码.md) - 字符编码相关的内容总结
 
     * **Web**
         * [Speed-Web](./1earn/Develop/Web/Speed-Web.md)
@@ -169,8 +174,7 @@
         * [Speed-Win](./1earn/Integrated/Windows/Speed-Win.md) - 记录 windows 下 CMD 常用命令
         * [笔记](https://github.com/No-Github/1earn/tree/master/1earn/Integrated/Windows/%E7%AC%94%E8%AE%B0)
         * [实验](https://github.com/No-Github/1earn/tree/master/1earn/Integrated/Windows/%E5%AE%9E%E9%AA%8C) -涉及域环境搭建、基础服务搭建
-        * Powershell
-            * [PowerShell笔记](./1earn/Integrated/Windows/PowerShell/PowerShell笔记.md) - 记录 powershell 常用命令
+        * [Powershell](https://github.com/No-Github/1earn/tree/master/1earn/Integrated/Windows/PowerShell)
 
 * **Plan**
 
@@ -178,7 +182,6 @@
     * [Team-Plan](./1earn/Plan/Team-Plan.md) - 团队协作解决方案
     * [Thinking-Plan](./1earn/Plan/Thinking-Plan.md) - 问题解决方式的记录和学习
     * [VM-Plan](./1earn/Plan/VM-Plan.md) - VMWare 常见问题记录
-    * [Web-Tools](./1earn/Plan/Web-Tools.md) - 在线 web 工具集合
 
 ---
 

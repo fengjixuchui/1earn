@@ -1,4 +1,4 @@
- # shell 编程
+# shell 编程
 
 ---
 
@@ -36,6 +36,12 @@
 - source 命令通常用于重新执行刚修改的初始化文件,如 .bash_profile 和 .profile 等等.
 - source 命令可以影响执行脚本的父 shell 的环境,而 export 则只能影响其子 shell 的环境.
 - source a.sh 同直接执行 ./a.sh 有什么不同呢,比如你在一个脚本里 `export $KKK=111` ,如果你用 ./a.sh 执行该脚本,执行完毕后,你运行 `echo $KKK` ,发现没有值,如果你用 `source` 来执行 ,然后再 `echo` ,就会发现 KKK=111.因为调用 ./a.sh 来执行 shell 是在一个子 shell 里运行的,所以执行后,结果并没有反应到父 shell 里,不过 source 不同,他就是在本 shell 中执行的,所以能看到结果.
+
+**sast 工具**
+- https://github.com/koalaman/shellcheck
+
+**资源教程**
+- [dylanaraps/pure-bash-bible](https://github.com/dylanaraps/pure-bash-bible#get-the-username-of-the-current-user)
 
 ---
 
@@ -161,6 +167,8 @@ done                        # 第7行：循环体结束
 - 中间不能有空格，可以使用下划线（_）。
 - 不能使用标点符号。
 - 不能使用 bash 里的关键字（可用 help 命令查看保留关键字）。
+
+> 注意，赋值号 = 的周围不能有空格!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 定义变量时，变量名不加美元符号（$），如：
 ```sh
@@ -1393,7 +1401,7 @@ github
 
 # 函数
 
-linux shell 可以用户定义函数，然后在shell脚本中可以随便调用。
+linux shell 可以用户定义函数，然后在 shell 脚本中可以随便调用。
 
 shell 中函数的定义格式如下
 ```sh
@@ -1565,12 +1573,12 @@ command1 < infile > outfile
 
 如果希望 stderr 重定向到 file，可以这样写：
 ```bash
-command 2 > file
+command 2> file
 ```
 
 如果希望 stderr 追加到 file 文件末尾，可以这样写：
 ```sh
-command 2 >> file
+command 2>> file
 ```
 
 如果希望将 stdout 和 stderr 合并后重定向到 file，可以这样写：
@@ -1692,11 +1700,11 @@ echo "地址：$url"
 
 # 调式脚本
 
-在 shell 脚本中添加 set –xv 来调试输出
+在 shell 脚本中添加 set -xv 来调试输出
 ```diff
 vim test.sh
 
-++ set –xv
+++ set -xv
 ```
 
 或者在执行 shell 脚本时提供该设置

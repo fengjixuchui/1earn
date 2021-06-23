@@ -24,9 +24,12 @@
 * **[信息泄露](#信息泄露)**
     * [目录遍历](#目录遍历)
     * [任意文件读取](#任意文件读取)
-    * [GIT源码泄露](#git源码泄露)
-    * [SVN源码泄露](#snv源码泄露)
+    * [源码泄露](#源码泄露)
+        * [GIT](#git)
+        * [SVN](#svn)
+        * [bzr](#bzr)
     * [DS_Store文件泄漏](#ds_store文件泄漏)
+    * [SWP文件泄露](#swp文件泄露)
     * [网站备份压缩文件](#网站备份压缩文件)
     * [WEB-INF/web.xml信息泄露](#web-infwebxml信息泄露)
     * [idea文件夹泄露](#idea文件夹泄露)
@@ -239,7 +242,7 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 # 文件上传
 
-- [文件上传漏洞](./文件上传漏洞.md)
+- [Upload](./Upload.md)
 
 ---
 
@@ -258,6 +261,15 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 ---
 
+## 目录浏览
+
+**Tips**
+
+使用 wget 遍历下载所有文件
+```
+wget -r --no-pare target.com/dir
+```
+
 ## 目录遍历
 
 **相关案例**
@@ -273,7 +285,9 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 ---
 
-## GIT源码泄露
+## 源码泄露
+
+### GIT
 
 **简介**
 
@@ -290,7 +304,7 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 ---
 
-## SVN源码泄露
+### SVN
 
 - `/.svn/entries`
 
@@ -300,6 +314,16 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 **相关工具**
 - [kost/dvcs-ripper](https://github.com/kost/dvcs-ripper) - SVN/GIT/HG 等版本控制系统的扫描工具
 - [admintony/svnExploit](https://github.com/admintony/svnExploit) - 一款 SVN 源代码利用工具，其完美支持 SVN<1.7 版本和 SVN>1.7 版本的 SVN 源代码泄露
+
+---
+
+### bzr
+
+**相关工具**
+- [kost/dvcs-ripper](https://github.com/kost/dvcs-ripper) - SVN/GIT/HG 等版本控制系统的扫描工具
+    ```
+    rip-bzr.pl -v -u http://www.example.com/.bzr/
+    ```
 
 ---
 
@@ -322,6 +346,16 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 ---
 
+## SWP文件泄露
+
+**简介**
+
+swp 即 swap 文件，在编辑文件时产生的临时文件，它是隐藏文件，如果程序正常退出，临时文件自动删除，如果意外退出就会保留，文件名为 .filename.swp。
+
+直接访问 .swp 文件，下载回来后删掉末尾的 .swp，获得源码文件
+
+---
+
 ## 网站备份压缩文件
 
 **简介**
@@ -336,6 +370,14 @@ Apache 是从右到左开始判断解析,如果为不可识别解析,就再往�
 
 **相关工具**
 - [oscommonjs/scan-backup-langzi-](https://github.com/oscommonjs/scan-backup-langzi-) - 扫描备份文件和敏感信息泄漏的扫描器，速度快，器大活好
+
+**Tips**
+- 有时候文件太大,想先确认一下文件结构和部分内容,这时可以使用 remotezip,直接列出远程 zip 文件的内容，而无需完全下载,甚至可以远程解压,仅下载部分内容
+    ```BASH
+    pip3 install remotezip
+    remotezip -l "http://site/bigfile.zip"          # 列出远程zip文件的内容
+    remotezip "http://site/bigfile.zip" "file.txt"  # 从远程zip⽂件解压出file.txt
+    ```
 
 ---
 
@@ -410,11 +452,20 @@ WEB-INF 主要包含一下文件或目录:
 
 ---
 
+## Swagger REST API 信息泄露
+
+**相关工具**
+- [lijiejie/swagger-exp](https://github.com/lijiejie/swagger-exp)
+- [jayus0821/swagger-hack](https://github.com/jayus0821/swagger-hack) - 自动化爬取并自动测试所有swagger接口
+
+---
+
 ## 各类APIkey泄露
 
 **相关文章**
 - [Unauthorized Google Maps API Key Usage Cases, and Why You Need to Care](https://medium.com/@ozguralp/unauthorized-google-maps-api-key-usage-cases-and-why-you-need-to-care-1ccb28bf21e)
 - [一些提取api key的正则表达式](https://bacde.me/post/Extract-API-Keys-From-Regex/)
+- [企业微信Secret Token利用思路](https://mp.weixin.qq.com/s/LMZVcZk7_1r_kOKRau5tAg)
 
 **相关案例**
 - [WooYun-2015-141929 - 神器之奇虎360某命令执行导致网站卫士等多个重要业务官网可getshell（可能影响接入站长）](https://php.mengsec.com/bugs/wooyun-2015-0141929.html)
@@ -435,7 +486,6 @@ WEB-INF 主要包含一下文件或目录:
 'mailgun_api': 'key-[0-9a-zA-Z]{32}',
 'mailchamp_api': '[0-9a-f]{32}-us[0-9]{1,2}',
 'picatic_api': 'sk_live_[0-9a-z]{32}',
-'google_oauth_id': '[0-9(+-[0-9A-Za-z_]{32}.apps.qooqleusercontent.com',
 'google_api': 'AIza[0-9A-Za-z-_]{35}',
 'google_captcha': '6L[0-9A-Za-z-_]{38}',
 'google_oauth': 'ya29\\.[0-9A-Za-z\\-_]+',
@@ -465,6 +515,9 @@ WEB-INF 主要包含一下文件或目录:
 ---
 
 # 不安全的输入
+
+**相关工具**
+- [commixproject/commix](https://github.com/commixproject/commix)
 
 ## http参数污染
 
@@ -518,33 +571,7 @@ SSI 就是在 HTML 文件中，可以通过注释行调用的命令或指针，�
 
 ## SSRF
 
-**简介**
-
-很多 web 应用都提供了从其他的服务器上获取数据的功能.使用用户指定的 URL,web 应用可以获取图片,下载文件,读取文件内容等.这个功能如果被恶意使用,可以利用存在缺陷的 web 应用作为代理攻击远程和本地的服务器.这种形式的攻击称为服务端请求伪造攻击(Server-side Request Forgery).
-
-一般情况下，SSRF 攻击的目标是从外网无法访问的内部系统。SSRF 形成的原因大都是由于服务端提供了从其他服务器应用获取数据的功能且没有对目标地址做过滤与限制。比如从指定URL地址获取网页文本内容，加载指定地址的图片，下载等等。
-
-**相关文章**
-- [SSRF 漏洞分析及利用](https://www.knowsec.net/archives/85/)
-- [浅析 SSRF 原理及利用方式](https://www.anquanke.com/post/id/145519)
-- [SSRF 利用与防御](https://hellohxk.com/blog/ssrf/)
-- [聊一聊ssrf漏洞的挖掘思路与技巧](https://bbs.ichunqiu.com/thread-49370-1-1.html)
-- [Bypassing SSRF Protection](https://medium.com/@vickieli/bypassing-ssrf-protection-e111ae70727b)
-
-**相关案例**
-- [My First SSRF Using DNS Rebinding](https://geleta.eu/2019/my-first-ssrf-using-dns-rebinfing/)
-- [SSRF in Exchange leads to ROOT access in all instances](https://hackerone.com/reports/341876) - 通过对 ssrf 访问 Google Cloud Metadata,直至 RCE
-
-**payload**
-- [bugbounty-cheatsheet/cheatsheets/ssrf.md](https://github.com/EdOverflow/bugbounty-cheatsheet/blob/master/cheatsheets/ssrf.md)
-- [AboutSecurity/Payload/SSRF](https://github.com/ffffffff0x/AboutSecurity/blob/master/Payload/SSRF/)
-
-**相关工具**
-- [In3tinct/See-SURF](https://github.com/In3tinct/See-SURF) - python 写的 ssrf 参数扫描工具
-- [swisskyrepo/SSRFmap](https://github.com/swisskyrepo/SSRFmap) - 自动化 Fuzz SSRF 开发工具
-
-**Bypass IP 限制**
-- [IP限制绕过](../IDOR.md#ip限制绕过)
+- [SSRF 笔记](./SSRF.md)
 
 ---
 
@@ -552,7 +579,7 @@ SSI 就是在 HTML 文件中，可以通过注释行调用的命令或指针，�
 
 `服务器端模板注入`
 
-- [SSTI 笔记](./SSTI.md)
+- [SSTI 笔记](./ssti.md)
 
 ---
 
@@ -588,6 +615,8 @@ CSRF 一般使用 form 表单提交请求，而浏览器是不会对 form 表单
 **相关文章**
 - [JSONP与CORS漏洞挖掘](https://www.anquanke.com/post/id/97671)
 - [认识CORS漏洞](https://mp.weixin.qq.com/s/J11CnjkGTa1ILHdFqMhGDA)
+- [浅析CORS攻击及其挖洞思路](https://xz.aliyun.com/t/7242)
+- [CORS跨域漏洞学习](https://www.cnblogs.com/Xy--1/p/13069099.html)
 
 **相关案例**
 - [CORS Misconfiguration, could lead to disclosure of sensitive information](https://hackerone.com/reports/426165)
@@ -595,6 +624,9 @@ CSRF 一般使用 form 表单提交请求，而浏览器是不会对 form 表单
 
 **相关工具**
 - [chenjj/CORScanner](https://github.com/chenjj/CORScanner) - 一个旨在发现网站的 CORS 错误配置漏洞的 python 工具
+
+**相关靶场**
+- [incredibleindishell/CORS_vulnerable_Lab-Without_Database](https://github.com/incredibleindishell/CORS_vulnerable_Lab-Without_Database)
 
 ---
 
@@ -672,10 +704,18 @@ SOME（Same Origin Method Execution），同源方式执行，不同于 XSS 盗�
 
 ## URL跳转漏洞
 
+`Open Redirect`
+
 **相关文章**
 - [URL 重定向及跳转漏洞](http://www.pandan.xyz/2016/11/15/url%20%E9%87%8D%E5%AE%9A%E5%90%91%E5%8F%8A%E8%B7%B3%E8%BD%AC%E6%BC%8F%E6%B4%9E/)
 - [分享几个绕过 URL 跳转限制的思路](https://www.anquanke.com/post/id/94377)
 - [浅析渗透实战中url跳转漏洞 ](https://xz.aliyun.com/t/5189)
+
+**相关工具**
+- [devanshbatham/OpenRedireX](https://github.com/devanshbatham/OpenRedireX)
+
+**字典**
+- https://github.com/No-Github/AboutSecurity/blob/master/Dic/Web/api_param/Fuzz_param_Register.txt
 
 ---
 
@@ -692,3 +732,4 @@ SOME（Same Origin Method Execution），同源方式执行，不同于 XSS 盗�
 
 **相关案例**
 - [Uber XSS + clickjacking](https://www.youtube.com/watch?v=5Gg4t3clwys)
+- [Stealing your private documents through a bug in Google Docs](https://savebreach.com/stealing-private-documents-through-a-google-docs-bug/)

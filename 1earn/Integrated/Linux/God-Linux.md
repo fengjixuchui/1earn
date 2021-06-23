@@ -23,6 +23,9 @@
 # bash
 
 ``` bash
+# 判断当前是否是登陆式或非登陆式 shell
+echo $0
+
 # 上一个命令的最后一个参数.例如:上一条命令(vim test.txt),cat !$ = cat test.txt
 !$
 
@@ -59,6 +62,9 @@ aaa
 bbb
 test
 EOF
+
+# hex 转 ASCII
+echo -e "\x68\x65\x6c\x6c\x6f"
 ```
 
 ## cd
@@ -203,4 +209,32 @@ let i=`find . -type f | wc -l`/2 ; find . -type f -print0 | shuf -z -n $i | xarg
 ``` bash
 无 root 权限,保存编辑的文件
 :w !sudo tee %
+```
+
+---
+
+# 性能
+
+```bash
+sync    # sync 命令做同步,以确保文件系统的完整性,将所有未写的系统缓冲区写到磁盘中,包含已修改的 i-node、已延的块 I/O 和读写映射文件.否则在释放缓存的过程中,可能会丢失未保存的文件.
+echo 1 > /proc/sys/vm/drop_caches   # 清理 pagecache(页面缓存)
+echo 2 > /proc/sys/vm/drop_caches   # 清理 dentries(目录缓存)和inodes
+echo 3 > /proc/sys/vm/drop_caches   # 清理 pagecache、dentries 和 inodes
+sync
+
+# 取消开启文件数限制
+ulimit -n 65535
+
+# 优化内存
+echo 128 > /proc/sys/vm/nr_hugepages        # 默认为0
+sysctl -w vm.nr_hugepages=128
+```
+
+---
+
+# 文本
+
+**计算文本文件中的单词出现次数**
+```bash
+grep -o -i test example.txt | wc -l         # 计算"test"出现在文件中的次数
 ```

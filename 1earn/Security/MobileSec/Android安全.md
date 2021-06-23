@@ -116,14 +116,12 @@ SSL/TLS Pinning 提供了两种锁定方式： Certificate Pinning 和 Public Ke
 - [APP硬编码密钥渗透测试](https://www.t00ls.net/articles-58594.html) - dexdump 脱壳,AES,OSS 利用
 
 **在线检测**
-- [360显危镜](http://appscan.360.cn/)
 - [腾讯金刚](https://service.security.tencent.com/kingkong)
 - [梆梆安全](https://dev.bangcle.com/)
 - [爱加密](https://www.ijiami.cn/index)
 - [娜迦信息](http://www.nagain.com/appscan/)
 - [海云安](https://www.secidea.com/hyx/index.php/user/login.html)
 - [APP审计系统](http://01hackcode.com/)
-- [SandDroid](http://sanddroid.xjtu.edu.cn/)
 - [360移动开放平台-APP漏洞扫描](http://dev.360.cn/html/vulscan/scanning.html)
 - [360加固保](https://jiagu.360.cn/#/global/index)
 - [百度AI安全加固平台](https://apkprotect.baidu.com/)
@@ -140,6 +138,7 @@ SSL/TLS Pinning 提供了两种锁定方式： Certificate Pinning 和 Public Ke
     ```
     apktool d xxx.apk -o xxx
     ```
+- [skylot/jadx](https://github.com/skylot/jadx)
 
 **信息收集**
 - [TheKingOfDuck/ApkAnalyser](https://github.com/TheKingOfDuck/ApkAnalyser) - 一键提取安卓应用中可能存在的敏感信息。
@@ -149,6 +148,12 @@ SSL/TLS Pinning 提供了两种锁定方式： Certificate Pinning 和 Public Ke
     grep -E "([0-9]{1,3}[\.]){3}[0-9]{1,3}" -r xxx --color=auto
     grep -E "https?://[a-zA-Z0-9\.\/_&=@$%?~#-]*" -r xxx --color=auto
     ```
+- 通过正则提取一些敏感信息
+    ```bash
+    apktool d app_name.apk
+    grep -EHirn "accesskey|admin|aes|api_key|apikey|checkClientTrusted|crypt|http:|https:|password|pinning|secret|SHA256|SharedPreferences|superuser|token|X509TrustManager|insert into" APKfolder/
+    ```
+- [s0md3v/Diggy](https://github.com/s0md3v/Diggy)
 
 ---
 
